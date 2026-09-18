@@ -1,5 +1,7 @@
 # KernelRelay
 
+[![CPU checks](https://github.com/pkarakala/kernel-relay/actions/workflows/ci.yml/badge.svg)](https://github.com/pkarakala/kernel-relay/actions/workflows/ci.yml)
+
 KernelRelay is a small, reproducible PyTorch-to-Triton compiler experiment. It finds one fusion opportunity in a PyTorch FX graph, tests kernel proposals against eager PyTorch, measures the correct implementations on a GPU, and keeps the fastest verified path—or falls back safely.
 
 The workload is `SiLU(LayerNorm(x + input_bias, weight=gamma, bias=beta))`. This is an **independent research prototype for one operator cluster**, not a general-purpose compiler or a production sandbox.

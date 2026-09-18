@@ -4,4 +4,4 @@ KernelRelay is a research prototype, not a service for executing untrusted code.
 
 Do not run arbitrary proposals, replay files, or external model output with the trusted-fixture option. Use disposable environments without credentials for GPU experiments.
 
-For a security-sensitive report, use GitHub's private vulnerability reporting feature if it is available for this repository. Otherwise, contact the maintainer privately through their GitHub profile; please do not publish exploit details in an issue before coordination. Ordinary bugs and documentation problems can be filed as public issues.
+For a security-sensitive report, use **Security → Report a vulnerability** on this repository; private vulnerability reporting is enabled. Please do not publish exploit details in an issue before coordination. Ordinary bugs and documentation problems can be filed as public issues.
