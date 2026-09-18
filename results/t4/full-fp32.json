@@ -1,0 +1,1633 @@
+{
+  "schema_version": "1.0",
+  "timestamp": "2026-09-17T01:50:30.850053+00:00",
+  "evaluation_completed": true,
+  "cli_arguments": {
+    "device": "cuda",
+    "rows": 8192,
+    "hidden_size": 128,
+    "dtype": "float32",
+    "warmup": 100,
+    "iters": 100,
+    "json_output": "/content/full-fp32.json",
+    "peak_tflops": null,
+    "peak_bandwidth_gbps": null,
+    "deployment_margin": 0.02,
+    "quick": false
+  },
+  "effective_cli_arguments": {
+    "device": "cuda",
+    "rows": 8192,
+    "hidden_size": 128,
+    "dtype": "float32",
+    "warmup": 100,
+    "iters": 100,
+    "json_output": "/content/full-fp32.json",
+    "peak_tflops": null,
+    "peak_bandwidth_gbps": null,
+    "deployment_margin": 0.02,
+    "quick": false
+  },
+  "provenance": {
+    "git_commit": null,
+    "script_sha256": "4683c4726c41128181b28a877de00ffab4c78ec2d8bb3d207c65581845a2f0cd"
+  },
+  "hardware": {
+    "device": "cuda",
+    "platform": "Linux-6.6.122+-x86_64-with-glibc2.39",
+    "gpu_name": "Tesla T4",
+    "compute_capability": [
+      7,
+      5
+    ],
+    "memory_bytes": 15637086208,
+    "cuda_version": "12.8",
+    "pytorch_version": "2.11.0+cu128",
+    "triton_version": "3.6.0",
+    "triton_status": "3.6.0",
+    "python_version": "3.13.15"
+  },
+  "random_seed": 20260915,
+  "reproducibility": {
+    "input_seed": 20260915,
+    "additional_input_seeds": [
+      20260916,
+      20260917
+    ],
+    "input_generation": "CPU FP32, then cast to target dtype/device",
+    "tuning_seed": 20260916,
+    "finalist_round_seeds": [
+      20260917,
+      20260918,
+      20260919,
+      20260920,
+      20260921
+    ],
+    "deployment_round_seeds": [
+      20261916,
+      20261917,
+      20261918,
+      20261919,
+      20261920
+    ],
+    "validation_cases": [
+      "primary_random",
+      "random_seed_plus_1",
+      "random_seed_plus_2",
+      "all_zero",
+      "constant_rows",
+      "near_zero",
+      "alternating_large",
+      "nontrivial_affine"
+    ],
+    "benchmark_case": "primary_random"
+  },
+  "graph": {
+    "nodes": [
+      {
+        "name": "x",
+        "op": "placeholder",
+        "target": "x",
+        "input_edges": [],
+        "shape": [
+          8192,
+          128
+        ],
+        "dtype": "torch.float32",
+        "in_fusion_boundary": false
+      },
+      {
+        "name": "input_bias",
+        "op": "placeholder",
+        "target": "input_bias",
+        "input_edges": [],
+        "shape": [
+          128
+        ],
+        "dtype": "torch.float32",
+        "in_fusion_boundary": false
+      },
+      {
+        "name": "gamma",
+        "op": "placeholder",
+        "target": "gamma",
+        "input_edges": [],
+        "shape": [
+          128
+        ],
+        "dtype": "torch.float32",
+        "in_fusion_boundary": false
+      },
+      {
+        "name": "beta",
+        "op": "placeholder",
+        "target": "beta",
+        "input_edges": [],
+        "shape": [
+          128
+        ],
+        "dtype": "torch.float32",
+        "in_fusion_boundary": false
+      },
+      {
+        "name": "add",
+        "op": "call_function",
+        "target": "_operator.add",
+        "input_edges": [
+          "x",
+          "input_bias"
+        ],
+        "shape": [
+          8192,
+          128
+        ],
+        "dtype": "torch.float32",
+        "in_fusion_boundary": true
+      },
+      {
+        "name": "layer_norm",
+        "op": "call_function",
+        "target": "torch.nn.functional.layer_norm",
+        "input_edges": [
+          "add",
+          "gamma",
+          "beta"
+        ],
+        "shape": [
+          8192,
+          128
+        ],
+        "dtype": "torch.float32",
+        "in_fusion_boundary": true
+      },
+      {
+        "name": "silu",
+        "op": "call_function",
+        "target": "torch.nn.functional.silu",
+        "input_edges": [
+          "layer_norm"
+        ],
+        "shape": [
+          8192,
+          128
+        ],
+        "dtype": "torch.float32",
+        "in_fusion_boundary": true
+      },
+      {
+        "name": "output",
+        "op": "output",
+        "target": "output",
+        "input_edges": [
+          "silu"
+        ],
+        "shape": [
+          8192,
+          128
+        ],
+        "dtype": "torch.float32",
+        "in_fusion_boundary": false
+      }
+    ],
+    "shape_propagation_error": null,
+    "fusion_boundary": [
+      "add",
+      "layer_norm",
+      "silu"
+    ],
+    "fusion_eligible": true,
+    "eps": 1e-05,
+    "decision": "validated functional add -> layer_norm -> non-inplace silu; eps=1e-05",
+    "rejected_chains": []
+  },
+  "analytical_model": {
+    "flops": 14696448.0,
+    "eager_bytes": 25167360.0,
+    "fused_bytes": 8390144.0,
+    "avoided_bytes": 16777216.0,
+    "eager_ai": 0.5839487335978029,
+    "fused_ai": 1.7516323915298713,
+    "useful_bytes": 8390144.0,
+    "all_quantities_are_estimates": true,
+    "operation_convention": "14*hidden_size+2 ops/row; exp/rsqrt count as one; approximate reductions",
+    "useful_byte_definition": "input + output + one logical copy each of input_bias, gamma, beta",
+    "roofline_ridge_ops_per_byte": null,
+    "roofline_prediction": null,
+    "physical_bottleneck": "unclassified; no profiler-counter evidence"
+  },
+  "candidate_counts": {
+    "generated": 36,
+    "pruned": 18,
+    "shape_valid": 18,
+    "executed": 18,
+    "verified": 18,
+    "correctness_rejected": 0,
+    "runtime_failed": 0,
+    "skipped": 0,
+    "failed": 0,
+    "incorrect": 0,
+    "compilation_failed": 0
+  },
+  "candidate_count_semantics": "executed counts launch attempts; runtime_failed/failed include compilation failures; verified excludes later disqualifications",
+  "candidates": [
+    {
+      "configuration": {
+        "block_size": 256,
+        "num_warps": 8,
+        "num_stages": 4
+      },
+      "launch_attempted": true,
+      "launched": true,
+      "decision": "VERIFIED",
+      "reason": "all validation cases passed",
+      "failure": null,
+      "correctness": {
+        "passed": true,
+        "max_abs": 1.430511474609375e-06,
+        "max_rel": 0.01997499281991188,
+        "max_normalized_error": 0.0035134518476856785,
+        "mismatch_count": 0,
+        "mismatch_percentage": 0.0,
+        "elements_checked": 8388608,
+        "atol": 0.0001,
+        "rtol": 0.0001,
+        "reason": "all 8 validation cases passed"
+      },
+      "initial_sweep": {
+        "trial_medians_ms": [
+          0.20073600113391876
+        ],
+        "rounds": 1,
+        "median_ms": 0.20073600113391876,
+        "min_ms": 0.20073600113391876,
+        "max_ms": 0.20073600113391876
+      },
+      "is_finalist": false,
+      "finalist": {
+        "trial_medians_ms": [],
+        "rounds": 0,
+        "median_ms": null,
+        "min_ms": null,
+        "max_ms": null
+      }
+    },
+    {
+      "configuration": {
+        "block_size": 64,
+        "num_warps": 2,
+        "num_stages": 4
+      },
+      "launch_attempted": false,
+      "launched": false,
+      "decision": "PRUNED",
+      "reason": "BLOCK_SIZE cannot cover hidden_size",
+      "failure": null,
+      "correctness": null,
+      "initial_sweep": {
+        "trial_medians_ms": [],
+        "rounds": 0,
+        "median_ms": null,
+        "min_ms": null,
+        "max_ms": null
+      },
+      "is_finalist": false,
+      "finalist": {
+        "trial_medians_ms": [],
+        "rounds": 0,
+        "median_ms": null,
+        "min_ms": null,
+        "max_ms": null
+      }
+    },
+    {
+      "configuration": {
+        "block_size": 64,
+        "num_warps": 4,
+        "num_stages": 3
+      },
+      "launch_attempted": false,
+      "launched": false,
+      "decision": "PRUNED",
+      "reason": "BLOCK_SIZE cannot cover hidden_size",
+      "failure": null,
+      "correctness": null,
+      "initial_sweep": {
+        "trial_medians_ms": [],
+        "rounds": 0,
+        "median_ms": null,
+        "min_ms": null,
+        "max_ms": null
+      },
+      "is_finalist": false,
+      "finalist": {
+        "trial_medians_ms": [],
+        "rounds": 0,
+        "median_ms": null,
+        "min_ms": null,
+        "max_ms": null
+      }
+    },
+    {
+      "configuration": {
+        "block_size": 32,
+        "num_warps": 2,
+        "num_stages": 2
+      },
+      "launch_attempted": false,
+      "launched": false,
+      "decision": "PRUNED",
+      "reason": "BLOCK_SIZE cannot cover hidden_size",
+      "failure": null,
+      "correctness": null,
+      "initial_sweep": {
+        "trial_medians_ms": [],
+        "rounds": 0,
+        "median_ms": null,
+        "min_ms": null,
+        "max_ms": null
+      },
+      "is_finalist": false,
+      "finalist": {
+        "trial_medians_ms": [],
+        "rounds": 0,
+        "median_ms": null,
+        "min_ms": null,
+        "max_ms": null
+      }
+    },
+    {
+      "configuration": {
+        "block_size": 32,
+        "num_warps": 4,
+        "num_stages": 2
+      },
+      "launch_attempted": false,
+      "launched": false,
+      "decision": "PRUNED",
+      "reason": "BLOCK_SIZE cannot cover hidden_size",
+      "failure": null,
+      "correctness": null,
+      "initial_sweep": {
+        "trial_medians_ms": [],
+        "rounds": 0,
+        "median_ms": null,
+        "min_ms": null,
+        "max_ms": null
+      },
+      "is_finalist": false,
+      "finalist": {
+        "trial_medians_ms": [],
+        "rounds": 0,
+        "median_ms": null,
+        "min_ms": null,
+        "max_ms": null
+      }
+    },
+    {
+      "configuration": {
+        "block_size": 64,
+        "num_warps": 8,
+        "num_stages": 2
+      },
+      "launch_attempted": false,
+      "launched": false,
+      "decision": "PRUNED",
+      "reason": "BLOCK_SIZE cannot cover hidden_size",
+      "failure": null,
+      "correctness": null,
+      "initial_sweep": {
+        "trial_medians_ms": [],
+        "rounds": 0,
+        "median_ms": null,
+        "min_ms": null,
+        "max_ms": null
+      },
+      "is_finalist": false,
+      "finalist": {
+        "trial_medians_ms": [],
+        "rounds": 0,
+        "median_ms": null,
+        "min_ms": null,
+        "max_ms": null
+      }
+    },
+    {
+      "configuration": {
+        "block_size": 32,
+        "num_warps": 2,
+        "num_stages": 3
+      },
+      "launch_attempted": false,
+      "launched": false,
+      "decision": "PRUNED",
+      "reason": "BLOCK_SIZE cannot cover hidden_size",
+      "failure": null,
+      "correctness": null,
+      "initial_sweep": {
+        "trial_medians_ms": [],
+        "rounds": 0,
+        "median_ms": null,
+        "min_ms": null,
+        "max_ms": null
+      },
+      "is_finalist": false,
+      "finalist": {
+        "trial_medians_ms": [],
+        "rounds": 0,
+        "median_ms": null,
+        "min_ms": null,
+        "max_ms": null
+      }
+    },
+    {
+      "configuration": {
+        "block_size": 64,
+        "num_warps": 4,
+        "num_stages": 2
+      },
+      "launch_attempted": false,
+      "launched": false,
+      "decision": "PRUNED",
+      "reason": "BLOCK_SIZE cannot cover hidden_size",
+      "failure": null,
+      "correctness": null,
+      "initial_sweep": {
+        "trial_medians_ms": [],
+        "rounds": 0,
+        "median_ms": null,
+        "min_ms": null,
+        "max_ms": null
+      },
+      "is_finalist": false,
+      "finalist": {
+        "trial_medians_ms": [],
+        "rounds": 0,
+        "median_ms": null,
+        "min_ms": null,
+        "max_ms": null
+      }
+    },
+    {
+      "configuration": {
+        "block_size": 64,
+        "num_warps": 2,
+        "num_stages": 2
+      },
+      "launch_attempted": false,
+      "launched": false,
+      "decision": "PRUNED",
+      "reason": "BLOCK_SIZE cannot cover hidden_size",
+      "failure": null,
+      "correctness": null,
+      "initial_sweep": {
+        "trial_medians_ms": [],
+        "rounds": 0,
+        "median_ms": null,
+        "min_ms": null,
+        "max_ms": null
+      },
+      "is_finalist": false,
+      "finalist": {
+        "trial_medians_ms": [],
+        "rounds": 0,
+        "median_ms": null,
+        "min_ms": null,
+        "max_ms": null
+      }
+    },
+    {
+      "configuration": {
+        "block_size": 128,
+        "num_warps": 8,
+        "num_stages": 3
+      },
+      "launch_attempted": true,
+      "launched": true,
+      "decision": "VERIFIED",
+      "reason": "all validation cases passed",
+      "failure": null,
+      "correctness": {
+        "passed": true,
+        "max_abs": 1.430511474609375e-06,
+        "max_rel": 0.01997499281991188,
+        "max_normalized_error": 0.0035134518476856785,
+        "mismatch_count": 0,
+        "mismatch_percentage": 0.0,
+        "elements_checked": 8388608,
+        "atol": 0.0001,
+        "rtol": 0.0001,
+        "reason": "all 8 validation cases passed"
+      },
+      "initial_sweep": {
+        "trial_medians_ms": [
+          0.19382399320602417
+        ],
+        "rounds": 1,
+        "median_ms": 0.19382399320602417,
+        "min_ms": 0.19382399320602417,
+        "max_ms": 0.19382399320602417
+      },
+      "is_finalist": false,
+      "finalist": {
+        "trial_medians_ms": [],
+        "rounds": 0,
+        "median_ms": null,
+        "min_ms": null,
+        "max_ms": null
+      }
+    },
+    {
+      "configuration": {
+        "block_size": 256,
+        "num_warps": 2,
+        "num_stages": 3
+      },
+      "launch_attempted": true,
+      "launched": true,
+      "decision": "VERIFIED",
+      "reason": "all validation cases passed",
+      "failure": null,
+      "correctness": {
+        "passed": true,
+        "max_abs": 1.430511474609375e-06,
+        "max_rel": 0.03838574812980784,
+        "max_normalized_error": 0.0035134518476856785,
+        "mismatch_count": 0,
+        "mismatch_percentage": 0.0,
+        "elements_checked": 8388608,
+        "atol": 0.0001,
+        "rtol": 0.0001,
+        "reason": "all 8 validation cases passed"
+      },
+      "initial_sweep": {
+        "trial_medians_ms": [
+          0.06697600334882736
+        ],
+        "rounds": 1,
+        "median_ms": 0.06697600334882736,
+        "min_ms": 0.06697600334882736,
+        "max_ms": 0.06697600334882736
+      },
+      "is_finalist": false,
+      "finalist": {
+        "trial_medians_ms": [],
+        "rounds": 0,
+        "median_ms": null,
+        "min_ms": null,
+        "max_ms": null
+      }
+    },
+    {
+      "configuration": {
+        "block_size": 256,
+        "num_warps": 8,
+        "num_stages": 2
+      },
+      "launch_attempted": true,
+      "launched": true,
+      "decision": "VERIFIED",
+      "reason": "all validation cases passed",
+      "failure": null,
+      "correctness": {
+        "passed": true,
+        "max_abs": 1.430511474609375e-06,
+        "max_rel": 0.01997499281991188,
+        "max_normalized_error": 0.0035134518476856785,
+        "mismatch_count": 0,
+        "mismatch_percentage": 0.0,
+        "elements_checked": 8388608,
+        "atol": 0.0001,
+        "rtol": 0.0001,
+        "reason": "all 8 validation cases passed"
+      },
+      "initial_sweep": {
+        "trial_medians_ms": [
+          0.2008640021085739
+        ],
+        "rounds": 1,
+        "median_ms": 0.2008640021085739,
+        "min_ms": 0.2008640021085739,
+        "max_ms": 0.2008640021085739
+      },
+      "is_finalist": false,
+      "finalist": {
+        "trial_medians_ms": [],
+        "rounds": 0,
+        "median_ms": null,
+        "min_ms": null,
+        "max_ms": null
+      }
+    },
+    {
+      "configuration": {
+        "block_size": 32,
+        "num_warps": 8,
+        "num_stages": 4
+      },
+      "launch_attempted": false,
+      "launched": false,
+      "decision": "PRUNED",
+      "reason": "BLOCK_SIZE cannot cover hidden_size",
+      "failure": null,
+      "correctness": null,
+      "initial_sweep": {
+        "trial_medians_ms": [],
+        "rounds": 0,
+        "median_ms": null,
+        "min_ms": null,
+        "max_ms": null
+      },
+      "is_finalist": false,
+      "finalist": {
+        "trial_medians_ms": [],
+        "rounds": 0,
+        "median_ms": null,
+        "min_ms": null,
+        "max_ms": null
+      }
+    },
+    {
+      "configuration": {
+        "block_size": 32,
+        "num_warps": 4,
+        "num_stages": 3
+      },
+      "launch_attempted": false,
+      "launched": false,
+      "decision": "PRUNED",
+      "reason": "BLOCK_SIZE cannot cover hidden_size",
+      "failure": null,
+      "correctness": null,
+      "initial_sweep": {
+        "trial_medians_ms": [],
+        "rounds": 0,
+        "median_ms": null,
+        "min_ms": null,
+        "max_ms": null
+      },
+      "is_finalist": false,
+      "finalist": {
+        "trial_medians_ms": [],
+        "rounds": 0,
+        "median_ms": null,
+        "min_ms": null,
+        "max_ms": null
+      }
+    },
+    {
+      "configuration": {
+        "block_size": 256,
+        "num_warps": 4,
+        "num_stages": 4
+      },
+      "launch_attempted": true,
+      "launched": true,
+      "decision": "VERIFIED",
+      "reason": "all validation cases passed",
+      "failure": null,
+      "correctness": {
+        "passed": true,
+        "max_abs": 1.430511474609375e-06,
+        "max_rel": 0.02568206314909086,
+        "max_normalized_error": 0.0035134518476856785,
+        "mismatch_count": 0,
+        "mismatch_percentage": 0.0,
+        "elements_checked": 8388608,
+        "atol": 0.0001,
+        "rtol": 0.0001,
+        "reason": "all 8 validation cases passed"
+      },
+      "initial_sweep": {
+        "trial_medians_ms": [
+          0.10649599879980087
+        ],
+        "rounds": 1,
+        "median_ms": 0.10649599879980087,
+        "min_ms": 0.10649599879980087,
+        "max_ms": 0.10649599879980087
+      },
+      "is_finalist": false,
+      "finalist": {
+        "trial_medians_ms": [],
+        "rounds": 0,
+        "median_ms": null,
+        "min_ms": null,
+        "max_ms": null
+      }
+    },
+    {
+      "configuration": {
+        "block_size": 32,
+        "num_warps": 4,
+        "num_stages": 4
+      },
+      "launch_attempted": false,
+      "launched": false,
+      "decision": "PRUNED",
+      "reason": "BLOCK_SIZE cannot cover hidden_size",
+      "failure": null,
+      "correctness": null,
+      "initial_sweep": {
+        "trial_medians_ms": [],
+        "rounds": 0,
+        "median_ms": null,
+        "min_ms": null,
+        "max_ms": null
+      },
+      "is_finalist": false,
+      "finalist": {
+        "trial_medians_ms": [],
+        "rounds": 0,
+        "median_ms": null,
+        "min_ms": null,
+        "max_ms": null
+      }
+    },
+    {
+      "configuration": {
+        "block_size": 256,
+        "num_warps": 4,
+        "num_stages": 3
+      },
+      "launch_attempted": true,
+      "launched": true,
+      "decision": "VERIFIED",
+      "reason": "all validation cases passed",
+      "failure": null,
+      "correctness": {
+        "passed": true,
+        "max_abs": 1.430511474609375e-06,
+        "max_rel": 0.02568206314909086,
+        "max_normalized_error": 0.0035134518476856785,
+        "mismatch_count": 0,
+        "mismatch_percentage": 0.0,
+        "elements_checked": 8388608,
+        "atol": 0.0001,
+        "rtol": 0.0001,
+        "reason": "all 8 validation cases passed"
+      },
+      "initial_sweep": {
+        "trial_medians_ms": [
+          0.10646399855613708
+        ],
+        "rounds": 1,
+        "median_ms": 0.10646399855613708,
+        "min_ms": 0.10646399855613708,
+        "max_ms": 0.10646399855613708
+      },
+      "is_finalist": false,
+      "finalist": {
+        "trial_medians_ms": [],
+        "rounds": 0,
+        "median_ms": null,
+        "min_ms": null,
+        "max_ms": null
+      }
+    },
+    {
+      "configuration": {
+        "block_size": 256,
+        "num_warps": 2,
+        "num_stages": 4
+      },
+      "launch_attempted": true,
+      "launched": true,
+      "decision": "VERIFIED",
+      "reason": "all validation cases passed",
+      "failure": null,
+      "correctness": {
+        "passed": true,
+        "max_abs": 1.430511474609375e-06,
+        "max_rel": 0.03838574812980784,
+        "max_normalized_error": 0.0035134518476856785,
+        "mismatch_count": 0,
+        "mismatch_percentage": 0.0,
+        "elements_checked": 8388608,
+        "atol": 0.0001,
+        "rtol": 0.0001,
+        "reason": "all 8 validation cases passed"
+      },
+      "initial_sweep": {
+        "trial_medians_ms": [
+          0.0663359984755516
+        ],
+        "rounds": 1,
+        "median_ms": 0.0663359984755516,
+        "min_ms": 0.0663359984755516,
+        "max_ms": 0.0663359984755516
+      },
+      "is_finalist": false,
+      "finalist": {
+        "trial_medians_ms": [],
+        "rounds": 0,
+        "median_ms": null,
+        "min_ms": null,
+        "max_ms": null
+      }
+    },
+    {
+      "configuration": {
+        "block_size": 128,
+        "num_warps": 2,
+        "num_stages": 4
+      },
+      "launch_attempted": true,
+      "launched": true,
+      "decision": "VERIFIED",
+      "reason": "all validation cases passed",
+      "failure": null,
+      "correctness": {
+        "passed": true,
+        "max_abs": 1.430511474609375e-06,
+        "max_rel": 0.02568206314909086,
+        "max_normalized_error": 0.0035134518476856785,
+        "mismatch_count": 0,
+        "mismatch_percentage": 0.0,
+        "elements_checked": 8388608,
+        "atol": 0.0001,
+        "rtol": 0.0001,
+        "reason": "all 8 validation cases passed"
+      },
+      "initial_sweep": {
+        "trial_medians_ms": [
+          0.06361600011587143
+        ],
+        "rounds": 1,
+        "median_ms": 0.06361600011587143,
+        "min_ms": 0.06361600011587143,
+        "max_ms": 0.06361600011587143
+      },
+      "is_finalist": true,
+      "finalist": {
+        "trial_medians_ms": [
+          0.06355199962854385,
+          0.063680000603199,
+          0.06361600011587143,
+          0.10259199887514114,
+          0.10857599973678589
+        ],
+        "rounds": 5,
+        "median_ms": 0.063680000603199,
+        "min_ms": 0.06355199962854385,
+        "max_ms": 0.10857599973678589
+      }
+    },
+    {
+      "configuration": {
+        "block_size": 128,
+        "num_warps": 4,
+        "num_stages": 3
+      },
+      "launch_attempted": true,
+      "launched": true,
+      "decision": "VERIFIED",
+      "reason": "all validation cases passed",
+      "failure": null,
+      "correctness": {
+        "passed": true,
+        "max_abs": 1.430511474609375e-06,
+        "max_rel": 0.01997499281991188,
+        "max_normalized_error": 0.0035134518476856785,
+        "mismatch_count": 0,
+        "mismatch_percentage": 0.0,
+        "elements_checked": 8388608,
+        "atol": 0.0001,
+        "rtol": 0.0001,
+        "reason": "all 8 validation cases passed"
+      },
+      "initial_sweep": {
+        "trial_medians_ms": [
+          0.10339199751615524
+        ],
+        "rounds": 1,
+        "median_ms": 0.10339199751615524,
+        "min_ms": 0.10339199751615524,
+        "max_ms": 0.10339199751615524
+      },
+      "is_finalist": false,
+      "finalist": {
+        "trial_medians_ms": [],
+        "rounds": 0,
+        "median_ms": null,
+        "min_ms": null,
+        "max_ms": null
+      }
+    },
+    {
+      "configuration": {
+        "block_size": 64,
+        "num_warps": 8,
+        "num_stages": 4
+      },
+      "launch_attempted": false,
+      "launched": false,
+      "decision": "PRUNED",
+      "reason": "BLOCK_SIZE cannot cover hidden_size",
+      "failure": null,
+      "correctness": null,
+      "initial_sweep": {
+        "trial_medians_ms": [],
+        "rounds": 0,
+        "median_ms": null,
+        "min_ms": null,
+        "max_ms": null
+      },
+      "is_finalist": false,
+      "finalist": {
+        "trial_medians_ms": [],
+        "rounds": 0,
+        "median_ms": null,
+        "min_ms": null,
+        "max_ms": null
+      }
+    },
+    {
+      "configuration": {
+        "block_size": 256,
+        "num_warps": 4,
+        "num_stages": 2
+      },
+      "launch_attempted": true,
+      "launched": true,
+      "decision": "VERIFIED",
+      "reason": "all validation cases passed",
+      "failure": null,
+      "correctness": {
+        "passed": true,
+        "max_abs": 1.430511474609375e-06,
+        "max_rel": 0.02568206314909086,
+        "max_normalized_error": 0.0035134518476856785,
+        "mismatch_count": 0,
+        "mismatch_percentage": 0.0,
+        "elements_checked": 8388608,
+        "atol": 0.0001,
+        "rtol": 0.0001,
+        "reason": "all 8 validation cases passed"
+      },
+      "initial_sweep": {
+        "trial_medians_ms": [
+          0.10646399855613708
+        ],
+        "rounds": 1,
+        "median_ms": 0.10646399855613708,
+        "min_ms": 0.10646399855613708,
+        "max_ms": 0.10646399855613708
+      },
+      "is_finalist": false,
+      "finalist": {
+        "trial_medians_ms": [],
+        "rounds": 0,
+        "median_ms": null,
+        "min_ms": null,
+        "max_ms": null
+      }
+    },
+    {
+      "configuration": {
+        "block_size": 128,
+        "num_warps": 2,
+        "num_stages": 3
+      },
+      "launch_attempted": true,
+      "launched": true,
+      "decision": "VERIFIED",
+      "reason": "all validation cases passed",
+      "failure": null,
+      "correctness": {
+        "passed": true,
+        "max_abs": 1.430511474609375e-06,
+        "max_rel": 0.02568206314909086,
+        "max_normalized_error": 0.0035134518476856785,
+        "mismatch_count": 0,
+        "mismatch_percentage": 0.0,
+        "elements_checked": 8388608,
+        "atol": 0.0001,
+        "rtol": 0.0001,
+        "reason": "all 8 validation cases passed"
+      },
+      "initial_sweep": {
+        "trial_medians_ms": [
+          0.06364800035953522
+        ],
+        "rounds": 1,
+        "median_ms": 0.06364800035953522,
+        "min_ms": 0.06364800035953522,
+        "max_ms": 0.06364800035953522
+      },
+      "is_finalist": true,
+      "finalist": {
+        "trial_medians_ms": [
+          0.06364800035953522,
+          0.06371200084686279,
+          0.06361600011587143,
+          0.10595200210809708,
+          0.11673600226640701
+        ],
+        "rounds": 5,
+        "median_ms": 0.06371200084686279,
+        "min_ms": 0.06361600011587143,
+        "max_ms": 0.11673600226640701
+      }
+    },
+    {
+      "configuration": {
+        "block_size": 128,
+        "num_warps": 8,
+        "num_stages": 4
+      },
+      "launch_attempted": true,
+      "launched": true,
+      "decision": "VERIFIED",
+      "reason": "all validation cases passed",
+      "failure": null,
+      "correctness": {
+        "passed": true,
+        "max_abs": 1.430511474609375e-06,
+        "max_rel": 0.01997499281991188,
+        "max_normalized_error": 0.0035134518476856785,
+        "mismatch_count": 0,
+        "mismatch_percentage": 0.0,
+        "elements_checked": 8388608,
+        "atol": 0.0001,
+        "rtol": 0.0001,
+        "reason": "all 8 validation cases passed"
+      },
+      "initial_sweep": {
+        "trial_medians_ms": [
+          0.19385600090026855
+        ],
+        "rounds": 1,
+        "median_ms": 0.19385600090026855,
+        "min_ms": 0.19385600090026855,
+        "max_ms": 0.19385600090026855
+      },
+      "is_finalist": false,
+      "finalist": {
+        "trial_medians_ms": [],
+        "rounds": 0,
+        "median_ms": null,
+        "min_ms": null,
+        "max_ms": null
+      }
+    },
+    {
+      "configuration": {
+        "block_size": 128,
+        "num_warps": 4,
+        "num_stages": 2
+      },
+      "launch_attempted": true,
+      "launched": true,
+      "decision": "VERIFIED",
+      "reason": "all validation cases passed",
+      "failure": null,
+      "correctness": {
+        "passed": true,
+        "max_abs": 1.430511474609375e-06,
+        "max_rel": 0.01997499281991188,
+        "max_normalized_error": 0.0035134518476856785,
+        "mismatch_count": 0,
+        "mismatch_percentage": 0.0,
+        "elements_checked": 8388608,
+        "atol": 0.0001,
+        "rtol": 0.0001,
+        "reason": "all 8 validation cases passed"
+      },
+      "initial_sweep": {
+        "trial_medians_ms": [
+          0.10339199751615524
+        ],
+        "rounds": 1,
+        "median_ms": 0.10339199751615524,
+        "min_ms": 0.10339199751615524,
+        "max_ms": 0.10339199751615524
+      },
+      "is_finalist": false,
+      "finalist": {
+        "trial_medians_ms": [],
+        "rounds": 0,
+        "median_ms": null,
+        "min_ms": null,
+        "max_ms": null
+      }
+    },
+    {
+      "configuration": {
+        "block_size": 64,
+        "num_warps": 4,
+        "num_stages": 4
+      },
+      "launch_attempted": false,
+      "launched": false,
+      "decision": "PRUNED",
+      "reason": "BLOCK_SIZE cannot cover hidden_size",
+      "failure": null,
+      "correctness": null,
+      "initial_sweep": {
+        "trial_medians_ms": [],
+        "rounds": 0,
+        "median_ms": null,
+        "min_ms": null,
+        "max_ms": null
+      },
+      "is_finalist": false,
+      "finalist": {
+        "trial_medians_ms": [],
+        "rounds": 0,
+        "median_ms": null,
+        "min_ms": null,
+        "max_ms": null
+      }
+    },
+    {
+      "configuration": {
+        "block_size": 128,
+        "num_warps": 2,
+        "num_stages": 2
+      },
+      "launch_attempted": true,
+      "launched": true,
+      "decision": "VERIFIED",
+      "reason": "all validation cases passed",
+      "failure": null,
+      "correctness": {
+        "passed": true,
+        "max_abs": 1.430511474609375e-06,
+        "max_rel": 0.02568206314909086,
+        "max_normalized_error": 0.0035134518476856785,
+        "mismatch_count": 0,
+        "mismatch_percentage": 0.0,
+        "elements_checked": 8388608,
+        "atol": 0.0001,
+        "rtol": 0.0001,
+        "reason": "all 8 validation cases passed"
+      },
+      "initial_sweep": {
+        "trial_medians_ms": [
+          0.06361600011587143
+        ],
+        "rounds": 1,
+        "median_ms": 0.06361600011587143,
+        "min_ms": 0.06361600011587143,
+        "max_ms": 0.06361600011587143
+      },
+      "is_finalist": true,
+      "finalist": {
+        "trial_medians_ms": [
+          0.06364800035953522,
+          0.06364800035953522,
+          0.06371200084686279,
+          0.11343999952077866,
+          0.11660800129175186
+        ],
+        "rounds": 5,
+        "median_ms": 0.06371200084686279,
+        "min_ms": 0.06364800035953522,
+        "max_ms": 0.11660800129175186
+      }
+    },
+    {
+      "configuration": {
+        "block_size": 256,
+        "num_warps": 8,
+        "num_stages": 3
+      },
+      "launch_attempted": true,
+      "launched": true,
+      "decision": "VERIFIED",
+      "reason": "all validation cases passed",
+      "failure": null,
+      "correctness": {
+        "passed": true,
+        "max_abs": 1.430511474609375e-06,
+        "max_rel": 0.01997499281991188,
+        "max_normalized_error": 0.0035134518476856785,
+        "mismatch_count": 0,
+        "mismatch_percentage": 0.0,
+        "elements_checked": 8388608,
+        "atol": 0.0001,
+        "rtol": 0.0001,
+        "reason": "all 8 validation cases passed"
+      },
+      "initial_sweep": {
+        "trial_medians_ms": [
+          0.2008640021085739
+        ],
+        "rounds": 1,
+        "median_ms": 0.2008640021085739,
+        "min_ms": 0.2008640021085739,
+        "max_ms": 0.2008640021085739
+      },
+      "is_finalist": false,
+      "finalist": {
+        "trial_medians_ms": [],
+        "rounds": 0,
+        "median_ms": null,
+        "min_ms": null,
+        "max_ms": null
+      }
+    },
+    {
+      "configuration": {
+        "block_size": 256,
+        "num_warps": 2,
+        "num_stages": 2
+      },
+      "launch_attempted": true,
+      "launched": true,
+      "decision": "VERIFIED",
+      "reason": "all validation cases passed",
+      "failure": null,
+      "correctness": {
+        "passed": true,
+        "max_abs": 1.430511474609375e-06,
+        "max_rel": 0.03838574812980784,
+        "max_normalized_error": 0.0035134518476856785,
+        "mismatch_count": 0,
+        "mismatch_percentage": 0.0,
+        "elements_checked": 8388608,
+        "atol": 0.0001,
+        "rtol": 0.0001,
+        "reason": "all 8 validation cases passed"
+      },
+      "initial_sweep": {
+        "trial_medians_ms": [
+          0.06672000139951706
+        ],
+        "rounds": 1,
+        "median_ms": 0.06672000139951706,
+        "min_ms": 0.06672000139951706,
+        "max_ms": 0.06672000139951706
+      },
+      "is_finalist": false,
+      "finalist": {
+        "trial_medians_ms": [],
+        "rounds": 0,
+        "median_ms": null,
+        "min_ms": null,
+        "max_ms": null
+      }
+    },
+    {
+      "configuration": {
+        "block_size": 32,
+        "num_warps": 8,
+        "num_stages": 3
+      },
+      "launch_attempted": false,
+      "launched": false,
+      "decision": "PRUNED",
+      "reason": "BLOCK_SIZE cannot cover hidden_size",
+      "failure": null,
+      "correctness": null,
+      "initial_sweep": {
+        "trial_medians_ms": [],
+        "rounds": 0,
+        "median_ms": null,
+        "min_ms": null,
+        "max_ms": null
+      },
+      "is_finalist": false,
+      "finalist": {
+        "trial_medians_ms": [],
+        "rounds": 0,
+        "median_ms": null,
+        "min_ms": null,
+        "max_ms": null
+      }
+    },
+    {
+      "configuration": {
+        "block_size": 64,
+        "num_warps": 8,
+        "num_stages": 3
+      },
+      "launch_attempted": false,
+      "launched": false,
+      "decision": "PRUNED",
+      "reason": "BLOCK_SIZE cannot cover hidden_size",
+      "failure": null,
+      "correctness": null,
+      "initial_sweep": {
+        "trial_medians_ms": [],
+        "rounds": 0,
+        "median_ms": null,
+        "min_ms": null,
+        "max_ms": null
+      },
+      "is_finalist": false,
+      "finalist": {
+        "trial_medians_ms": [],
+        "rounds": 0,
+        "median_ms": null,
+        "min_ms": null,
+        "max_ms": null
+      }
+    },
+    {
+      "configuration": {
+        "block_size": 128,
+        "num_warps": 4,
+        "num_stages": 4
+      },
+      "launch_attempted": true,
+      "launched": true,
+      "decision": "VERIFIED",
+      "reason": "all validation cases passed",
+      "failure": null,
+      "correctness": {
+        "passed": true,
+        "max_abs": 1.430511474609375e-06,
+        "max_rel": 0.01997499281991188,
+        "max_normalized_error": 0.0035134518476856785,
+        "mismatch_count": 0,
+        "mismatch_percentage": 0.0,
+        "elements_checked": 8388608,
+        "atol": 0.0001,
+        "rtol": 0.0001,
+        "reason": "all 8 validation cases passed"
+      },
+      "initial_sweep": {
+        "trial_medians_ms": [
+          0.10345599800348282
+        ],
+        "rounds": 1,
+        "median_ms": 0.10345599800348282,
+        "min_ms": 0.10345599800348282,
+        "max_ms": 0.10345599800348282
+      },
+      "is_finalist": false,
+      "finalist": {
+        "trial_medians_ms": [],
+        "rounds": 0,
+        "median_ms": null,
+        "min_ms": null,
+        "max_ms": null
+      }
+    },
+    {
+      "configuration": {
+        "block_size": 32,
+        "num_warps": 8,
+        "num_stages": 2
+      },
+      "launch_attempted": false,
+      "launched": false,
+      "decision": "PRUNED",
+      "reason": "BLOCK_SIZE cannot cover hidden_size",
+      "failure": null,
+      "correctness": null,
+      "initial_sweep": {
+        "trial_medians_ms": [],
+        "rounds": 0,
+        "median_ms": null,
+        "min_ms": null,
+        "max_ms": null
+      },
+      "is_finalist": false,
+      "finalist": {
+        "trial_medians_ms": [],
+        "rounds": 0,
+        "median_ms": null,
+        "min_ms": null,
+        "max_ms": null
+      }
+    },
+    {
+      "configuration": {
+        "block_size": 64,
+        "num_warps": 2,
+        "num_stages": 3
+      },
+      "launch_attempted": false,
+      "launched": false,
+      "decision": "PRUNED",
+      "reason": "BLOCK_SIZE cannot cover hidden_size",
+      "failure": null,
+      "correctness": null,
+      "initial_sweep": {
+        "trial_medians_ms": [],
+        "rounds": 0,
+        "median_ms": null,
+        "min_ms": null,
+        "max_ms": null
+      },
+      "is_finalist": false,
+      "finalist": {
+        "trial_medians_ms": [],
+        "rounds": 0,
+        "median_ms": null,
+        "min_ms": null,
+        "max_ms": null
+      }
+    },
+    {
+      "configuration": {
+        "block_size": 128,
+        "num_warps": 8,
+        "num_stages": 2
+      },
+      "launch_attempted": true,
+      "launched": true,
+      "decision": "VERIFIED",
+      "reason": "all validation cases passed",
+      "failure": null,
+      "correctness": {
+        "passed": true,
+        "max_abs": 1.430511474609375e-06,
+        "max_rel": 0.01997499281991188,
+        "max_normalized_error": 0.0035134518476856785,
+        "mismatch_count": 0,
+        "mismatch_percentage": 0.0,
+        "elements_checked": 8388608,
+        "atol": 0.0001,
+        "rtol": 0.0001,
+        "reason": "all 8 validation cases passed"
+      },
+      "initial_sweep": {
+        "trial_medians_ms": [
+          0.19395199418067932
+        ],
+        "rounds": 1,
+        "median_ms": 0.19395199418067932,
+        "min_ms": 0.19395199418067932,
+        "max_ms": 0.19395199418067932
+      },
+      "is_finalist": false,
+      "finalist": {
+        "trial_medians_ms": [],
+        "rounds": 0,
+        "median_ms": null,
+        "min_ms": null,
+        "max_ms": null
+      }
+    },
+    {
+      "configuration": {
+        "block_size": 32,
+        "num_warps": 2,
+        "num_stages": 4
+      },
+      "launch_attempted": false,
+      "launched": false,
+      "decision": "PRUNED",
+      "reason": "BLOCK_SIZE cannot cover hidden_size",
+      "failure": null,
+      "correctness": null,
+      "initial_sweep": {
+        "trial_medians_ms": [],
+        "rounds": 0,
+        "median_ms": null,
+        "min_ms": null,
+        "max_ms": null
+      },
+      "is_finalist": false,
+      "finalist": {
+        "trial_medians_ms": [],
+        "rounds": 0,
+        "median_ms": null,
+        "min_ms": null,
+        "max_ms": null
+      }
+    }
+  ],
+  "timing_protocol": {
+    "statistic": "median of trial medians",
+    "tuning_warmup": 10,
+    "tuning_iterations": 25,
+    "finalist_rounds": 5,
+    "finalist_count_limit": 3,
+    "deployment_rounds": 5,
+    "deployment_warmup": 100,
+    "deployment_iterations": 100,
+    "clock": "CUDA events with synchronization",
+    "compilation_validation_autotuning_excluded": true
+  },
+  "paths": {
+    "eager": {
+      "implementation": "Eager PyTorch",
+      "available_and_verified": true,
+      "latency_ms": 0.20827200263738632,
+      "timing": {
+        "trial_medians_ms": [
+          0.24982400238513947,
+          0.20848000049591064,
+          0.20827200263738632,
+          0.16726399958133698,
+          0.1648000031709671
+        ],
+        "rounds": 5,
+        "median_ms": 0.20827200263738632,
+        "min_ms": 0.1648000031709671,
+        "max_ms": 0.24982400238513947
+      },
+      "correctness": {
+        "passed": true,
+        "max_abs": 0.0,
+        "max_rel": 0.0,
+        "max_normalized_error": 0.0,
+        "mismatch_count": 0,
+        "mismatch_percentage": 0.0,
+        "elements_checked": 8388608,
+        "atol": 0.0001,
+        "rtol": 0.0001,
+        "reason": "all 8 validation cases passed"
+      },
+      "estimated_effective_bandwidth_gbps": 40.284550461675494,
+      "speedup_over_eager": 1.0,
+      "failure": null,
+      "fallback_path": null,
+      "fallback_reason": null
+    },
+    "torch_compile": {
+      "implementation": "torch.compile / Inductor",
+      "available_and_verified": true,
+      "latency_ms": 0.25729599595069885,
+      "timing": {
+        "trial_medians_ms": [
+          0.2773279994726181,
+          0.25729599595069885,
+          0.26980800926685333,
+          0.16870400309562683,
+          0.1658720001578331
+        ],
+        "rounds": 5,
+        "median_ms": 0.25729599595069885,
+        "min_ms": 0.1658720001578331,
+        "max_ms": 0.2773279994726181
+      },
+      "correctness": {
+        "passed": true,
+        "max_abs": 1.430511474609375e-06,
+        "max_rel": 0.02568206314909086,
+        "max_normalized_error": 0.0035134518476856785,
+        "mismatch_count": 0,
+        "mismatch_percentage": 0.0,
+        "elements_checked": 8388608,
+        "atol": 0.0001,
+        "rtol": 0.0001,
+        "reason": "all 8 validation cases passed"
+      },
+      "estimated_effective_bandwidth_gbps": 32.60891786908202,
+      "speedup_over_eager": 0.8094646085254038,
+      "failure": null,
+      "fallback_path": null,
+      "fallback_reason": null
+    },
+    "triton": {
+      "implementation": "fused Triton",
+      "available_and_verified": true,
+      "latency_ms": 0.10651199892163277,
+      "timing": {
+        "trial_medians_ms": [
+          0.10651199892163277,
+          0.11652800068259239,
+          0.11431999877095222,
+          0.0554720014333725,
+          0.0758879967033863
+        ],
+        "rounds": 5,
+        "median_ms": 0.10651199892163277,
+        "min_ms": 0.0554720014333725,
+        "max_ms": 0.11652800068259239
+      },
+      "correctness": {
+        "passed": true,
+        "max_abs": 1.430511474609375e-06,
+        "max_rel": 0.02568206314909086,
+        "max_normalized_error": 0.0035134518476856785,
+        "mismatch_count": 0,
+        "mismatch_percentage": 0.0,
+        "elements_checked": 8388608,
+        "atol": 0.0001,
+        "rtol": 0.0001,
+        "reason": "all 8 validation cases passed"
+      },
+      "estimated_effective_bandwidth_gbps": 78.77181993526503,
+      "speedup_over_eager": 1.9553853532560632,
+      "failure": null,
+      "fallback_path": null,
+      "fallback_reason": null
+    }
+  },
+  "selection": {
+    "implementation": "fused Triton",
+    "configuration": {
+      "block_size": 128,
+      "num_warps": 2,
+      "num_stages": 4
+    },
+    "best_observed_tuning_configuration": {
+      "block_size": 128,
+      "num_warps": 2,
+      "num_stages": 4
+    },
+    "tuning_rule": "shuffled initial sweep; top three verified; median of interleaved finalist trial medians",
+    "deployment_margin": 0.02,
+    "rationale": "Triton cleared the 2% margin against Eager PyTorch using median of interleaved deployment trial medians",
+    "fallback_path": null,
+    "fallback_reason": null
+  },
+  "nonfinite_encoding": "non-finite diagnostics are null, never NaN or Infinity",
+  "failure_classification": "known compiler exception chains => compilation; other execution exceptions => runtime"
+}

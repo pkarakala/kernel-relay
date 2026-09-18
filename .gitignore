@@ -1,0 +1,10 @@
+.DS_Store
+__pycache__/
+*.py[cod]
+gpu_validation.txt
+.venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.agent-trial-*/
+results/agent-eval/*-rerun.json

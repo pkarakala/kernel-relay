@@ -1,0 +1,46 @@
+WARNING: explicit trusted-fixture mode; exact repository mock fixtures only; NO OS SANDBOX.
+V2 bias_layernorm_silu | cuda | Tesla T4
+baseline eager: measured; 0.15703999996185303
+baseline inductor_default: measured; 0.17819199711084366
+baseline inductor_max_autotune: measured; 0.19352000206708908
+round 0: compile_error; reward=-1.0; SyntaxError: invalid syntax (candidate.py, line 1)
+round 1: measured; reward=0.0; 0.15703999996185303
+round 2: measured; reward=1.0074323186566085; 0.05734400078654289
+round 3: measured; reward=1.0074323186566085; 0.05734400078654289
+round 4: measured; reward=0.43671767307495846; 0.10147199779748917
+round 5: measured; reward=0.43624474441426675; 0.10151999816298485
+round 6: measured; reward=-0.19027086407559368; 0.18995200097560883
+round 7: measured; reward=-0.18942822390875835; 0.18979200720787048
+{
+  "gpu_performance_evaluated": true,
+  "isolation": {
+    "mode": "trusted_fixture_colab",
+    "explicit_opt_in": true,
+    "trust_scope": "exact repository mock fixtures and trusted framework baselines only",
+    "filesystem_confinement": "none",
+    "landlock": {
+      "available": false,
+      "abi": null,
+      "errno": 38,
+      "reason": "Landlock unavailable: ENOSYS; kernel or host seccomp policy"
+    },
+    "production_sandbox": false,
+    "warning": "No OS sandbox: trusted fixtures only; not safe for arbitrary or replay source"
+  },
+  "selected_round": 2,
+  "stop_reason": "max_rounds",
+  "metrics": {
+    "compile_success_rate": 0.875,
+    "correctness_rate": 0.875,
+    "best_verified_candidate_latency_ms": 0.05734400078654289,
+    "best_baseline_latency_ms": 0.15703999996185303,
+    "speedup_over_eager": 2.7385602296292193,
+    "speedup_over_best_compiler_baseline": 3.1074217819950323,
+    "speedup_over_best_baseline": 2.7385602296292193,
+    "number_of_optimization_rounds": 8,
+    "number_of_correct_candidates": 7,
+    "number_of_faster_than_baseline_candidates": 4,
+    "total_optimization_wall_time_seconds": 63.38550598999973
+  }
+}
+Completed trace: /content/kernel-relay/results/agent-eval/v2-full-t4-fp16-repeat3.json

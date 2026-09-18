@@ -1,0 +1,96 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="470" viewBox="0 0 1400 470" role="img" aria-labelledby="title desc">
+  <title id="title">Closed compiler loop</title>
+  <desc id="desc">A seven stage flow from a PyTorch module through graph capture, semantic matching, candidate search, correctness validation, benchmarking, and deployment or fallback.</desc>
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L0,6 L9,3 z" fill="#526173"/>
+    </marker>
+    <style>
+      .title { font: 700 28px Arial, sans-serif; fill: #172033; }
+      .boxTitle { font: 700 18px Arial, sans-serif; fill: #172033; }
+      .boxText { font: 14px Arial, sans-serif; fill: #3f4b5f; }
+      .step { font: 700 13px Arial, sans-serif; fill: #ffffff; }
+      .arrow { stroke: #526173; stroke-width: 3; fill: none; marker-end: url(#arrow); }
+    </style>
+  </defs>
+  <rect width="1400" height="470" rx="18" fill="#f6f8fb"/>
+  <text x="700" y="48" text-anchor="middle" class="title">Closed compiler loop</text>
+
+  <g transform="translate(45 95)">
+    <rect width="260" height="105" rx="14" fill="#ffffff" stroke="#9aa7b8" stroke-width="2"/>
+    <circle cx="30" cy="29" r="17" fill="#315f9f"/>
+    <text x="30" y="34" text-anchor="middle" class="step">1</text>
+    <text x="58" y="34" class="boxTitle">Observe</text>
+    <text x="22" y="68" class="boxText">Capture the PyTorch FX graph</text>
+    <text x="22" y="89" class="boxText">and propagate shape metadata</text>
+  </g>
+
+  <path d="M305 147 L355 147" class="arrow"/>
+
+  <g transform="translate(365 95)">
+    <rect width="260" height="105" rx="14" fill="#ffffff" stroke="#9aa7b8" stroke-width="2"/>
+    <circle cx="30" cy="29" r="17" fill="#315f9f"/>
+    <text x="30" y="34" text-anchor="middle" class="step">2</text>
+    <text x="58" y="34" class="boxTitle">Match</text>
+    <text x="22" y="68" class="boxText">Validate operator semantics,</text>
+    <text x="22" y="89" class="boxText">tensor roles, and graph users</text>
+  </g>
+
+  <path d="M625 147 L675 147" class="arrow"/>
+
+  <g transform="translate(685 95)">
+    <rect width="260" height="105" rx="14" fill="#ffffff" stroke="#9aa7b8" stroke-width="2"/>
+    <circle cx="30" cy="29" r="17" fill="#315f9f"/>
+    <text x="30" y="34" text-anchor="middle" class="step">3</text>
+    <text x="58" y="34" class="boxTitle">Propose</text>
+    <text x="22" y="68" class="boxText">Enumerate bounded Triton</text>
+    <text x="22" y="89" class="boxText">launch configurations</text>
+  </g>
+
+  <path d="M945 147 L995 147" class="arrow"/>
+
+  <g transform="translate(1005 95)">
+    <rect width="350" height="105" rx="14" fill="#ffffff" stroke="#9aa7b8" stroke-width="2"/>
+    <circle cx="30" cy="29" r="17" fill="#315f9f"/>
+    <text x="30" y="34" text-anchor="middle" class="step">4</text>
+    <text x="58" y="34" class="boxTitle">Verify</text>
+    <text x="22" y="68" class="boxText">Compare every executed candidate</text>
+    <text x="22" y="89" class="boxText">with eager PyTorch</text>
+  </g>
+
+  <path d="M1180 200 L1180 252" class="arrow"/>
+
+  <g transform="translate(1005 265)">
+    <rect width="350" height="105" rx="14" fill="#ffffff" stroke="#9aa7b8" stroke-width="2"/>
+    <circle cx="30" cy="29" r="17" fill="#315f9f"/>
+    <text x="30" y="34" text-anchor="middle" class="step">5</text>
+    <text x="58" y="34" class="boxTitle">Measure</text>
+    <text x="22" y="68" class="boxText">Run synchronized and interleaved</text>
+    <text x="22" y="89" class="boxText">steady state timing rounds</text>
+  </g>
+
+  <path d="M1005 317 L955 317" class="arrow"/>
+
+  <g transform="translate(685 265)">
+    <rect width="260" height="105" rx="14" fill="#ffffff" stroke="#9aa7b8" stroke-width="2"/>
+    <circle cx="30" cy="29" r="17" fill="#315f9f"/>
+    <text x="30" y="34" text-anchor="middle" class="step">6</text>
+    <text x="58" y="34" class="boxTitle">Select</text>
+    <text x="22" y="68" class="boxText">Apply the 2 percent</text>
+    <text x="22" y="89" class="boxText">deployment margin</text>
+  </g>
+
+  <path d="M685 317 L635 317" class="arrow"/>
+
+  <g transform="translate(285 265)">
+    <rect width="340" height="105" rx="14" fill="#eaf4ef" stroke="#4d8b6d" stroke-width="2"/>
+    <circle cx="30" cy="29" r="17" fill="#35745a"/>
+    <text x="30" y="34" text-anchor="middle" class="step">7</text>
+    <text x="58" y="34" class="boxTitle">Deploy or fall back</text>
+    <text x="22" y="68" class="boxText">Use verified Triton only when it wins</text>
+    <text x="22" y="89" class="boxText">Otherwise retain a framework path</text>
+  </g>
+
+  <path d="M285 317 C165 317 90 280 90 212" class="arrow"/>
+  <text x="126" y="285" class="boxText">Next graph or target</text>
+</svg>

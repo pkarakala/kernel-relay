@@ -1,0 +1,96 @@
+{
+  "method": "same-process interleaved paths; 5 rounds; 100 warmups and 100 CUDA-event samples per path per round",
+  "device": "Tesla T4",
+  "pytorch": "2.11.0+cu128",
+  "cuda_runtime": "12.8",
+  "source_trace": "/content/kernel-relay/results/agent-eval/v2-full-t4-fp16.json",
+  "source_trace_sha256": "7350220764d2bf2accb1621528c7b93121d196473bb74bff14b369e5c55ae5eb",
+  "correctness": {
+    "eager": {
+      "passed": true,
+      "max_abs": 0.0,
+      "max_rel": 0.0,
+      "max_normalized_error": 0.0,
+      "mismatch_count": 0,
+      "mismatch_percentage": 0.0,
+      "elements_checked": 8388608,
+      "atol": 0.005,
+      "rtol": 0.005,
+      "reason": "all 8 validation cases passed"
+    },
+    "inductor_default": {
+      "passed": true,
+      "max_abs": 0.00390625,
+      "max_rel": 30.417910447761194,
+      "max_normalized_error": 0.25510204081632654,
+      "mismatch_count": 0,
+      "mismatch_percentage": 0.0,
+      "elements_checked": 8388608,
+      "atol": 0.005,
+      "rtol": 0.005,
+      "reason": "all 8 validation cases passed"
+    },
+    "fused-2": {
+      "passed": true,
+      "max_abs": 0.001953125,
+      "max_rel": 0.019230769230769232,
+      "max_normalized_error": 0.13559322033898305,
+      "mismatch_count": 0,
+      "mismatch_percentage": 0.0,
+      "elements_checked": 8388608,
+      "atol": 0.005,
+      "rtol": 0.005,
+      "reason": "all 8 validation cases passed"
+    },
+    "fused-3": {
+      "passed": true,
+      "max_abs": 0.001953125,
+      "max_rel": 0.019230769230769232,
+      "max_normalized_error": 0.13559322033898305,
+      "mismatch_count": 0,
+      "mismatch_percentage": 0.0,
+      "elements_checked": 8388608,
+      "atol": 0.005,
+      "rtol": 0.005,
+      "reason": "all 8 validation cases passed"
+    }
+  },
+  "trial_medians_ms": {
+    "eager": [
+      0.2008960023522377,
+      0.20081599801778793,
+      0.11982400342822075,
+      0.11683200299739838,
+      0.11680000275373459
+    ],
+    "inductor_default": [
+      0.14655999839305878,
+      0.14048000425100327,
+      0.13817600160837173,
+      0.14375999569892883,
+      0.13777600228786469
+    ],
+    "fused-2": [
+      0.057312000542879105,
+      0.057312000542879105,
+      0.05353599973022938,
+      0.0545439999550581,
+      0.05531200021505356
+    ],
+    "fused-3": [
+      0.05713599920272827,
+      0.05724800005555153,
+      0.05257599987089634,
+      0.053088000044226646,
+      0.05307199992239475
+    ]
+  },
+  "path_medians_ms": {
+    "eager": 0.11982400342822075,
+    "inductor_default": 0.14048000425100327,
+    "fused-2": 0.05531200021505356,
+    "fused-3": 0.053088000044226646
+  },
+  "best_fused_over_best_framework_speedup": 2.257082642563245,
+  "isolation_note": "Exact trusted repository mock fixtures only; this direct confirmation has no OS sandbox."
+}

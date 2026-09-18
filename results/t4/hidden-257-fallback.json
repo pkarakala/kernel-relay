@@ -1,0 +1,1344 @@
+{
+  "schema_version": "1.0",
+  "timestamp": "2026-09-17T02:08:50.521658+00:00",
+  "evaluation_completed": true,
+  "cli_arguments": {
+    "device": "cuda",
+    "rows": 257,
+    "hidden_size": 257,
+    "dtype": "float16",
+    "warmup": 100,
+    "iters": 100,
+    "json_output": "/content/hidden-257-fallback.json",
+    "peak_tflops": null,
+    "peak_bandwidth_gbps": null,
+    "deployment_margin": 0.02,
+    "quick": true
+  },
+  "effective_cli_arguments": {
+    "device": "cuda",
+    "rows": 257,
+    "hidden_size": 257,
+    "dtype": "float16",
+    "warmup": 3,
+    "iters": 10,
+    "json_output": "/content/hidden-257-fallback.json",
+    "peak_tflops": null,
+    "peak_bandwidth_gbps": null,
+    "deployment_margin": 0.02,
+    "quick": true
+  },
+  "provenance": {
+    "git_commit": null,
+    "script_sha256": "4683c4726c41128181b28a877de00ffab4c78ec2d8bb3d207c65581845a2f0cd"
+  },
+  "hardware": {
+    "device": "cuda",
+    "platform": "Linux-6.6.122+-x86_64-with-glibc2.39",
+    "gpu_name": "Tesla T4",
+    "compute_capability": [
+      7,
+      5
+    ],
+    "memory_bytes": 15637086208,
+    "cuda_version": "12.8",
+    "pytorch_version": "2.11.0+cu128",
+    "triton_version": "3.6.0",
+    "triton_status": "3.6.0",
+    "python_version": "3.13.15"
+  },
+  "random_seed": 20260915,
+  "reproducibility": {
+    "input_seed": 20260915,
+    "additional_input_seeds": [
+      20260916,
+      20260917
+    ],
+    "input_generation": "CPU FP32, then cast to target dtype/device",
+    "tuning_seed": 20260916,
+    "finalist_round_seeds": [
+      20260917,
+      20260918
+    ],
+    "deployment_round_seeds": [
+      20261916,
+      20261917
+    ],
+    "validation_cases": [
+      "primary_random",
+      "random_seed_plus_1",
+      "random_seed_plus_2",
+      "all_zero",
+      "constant_rows",
+      "near_zero",
+      "alternating_large",
+      "nontrivial_affine"
+    ],
+    "benchmark_case": "primary_random"
+  },
+  "graph": {
+    "nodes": [
+      {
+        "name": "x",
+        "op": "placeholder",
+        "target": "x",
+        "input_edges": [],
+        "shape": [
+          257,
+          257
+        ],
+        "dtype": "torch.float16",
+        "in_fusion_boundary": false
+      },
+      {
+        "name": "input_bias",
+        "op": "placeholder",
+        "target": "input_bias",
+        "input_edges": [],
+        "shape": [
+          257
+        ],
+        "dtype": "torch.float16",
+        "in_fusion_boundary": false
+      },
+      {
+        "name": "gamma",
+        "op": "placeholder",
+        "target": "gamma",
+        "input_edges": [],
+        "shape": [
+          257
+        ],
+        "dtype": "torch.float16",
+        "in_fusion_boundary": false
+      },
+      {
+        "name": "beta",
+        "op": "placeholder",
+        "target": "beta",
+        "input_edges": [],
+        "shape": [
+          257
+        ],
+        "dtype": "torch.float16",
+        "in_fusion_boundary": false
+      },
+      {
+        "name": "add",
+        "op": "call_function",
+        "target": "_operator.add",
+        "input_edges": [
+          "x",
+          "input_bias"
+        ],
+        "shape": [
+          257,
+          257
+        ],
+        "dtype": "torch.float16",
+        "in_fusion_boundary": true
+      },
+      {
+        "name": "layer_norm",
+        "op": "call_function",
+        "target": "torch.nn.functional.layer_norm",
+        "input_edges": [
+          "add",
+          "gamma",
+          "beta"
+        ],
+        "shape": [
+          257,
+          257
+        ],
+        "dtype": "torch.float16",
+        "in_fusion_boundary": true
+      },
+      {
+        "name": "silu",
+        "op": "call_function",
+        "target": "torch.nn.functional.silu",
+        "input_edges": [
+          "layer_norm"
+        ],
+        "shape": [
+          257,
+          257
+        ],
+        "dtype": "torch.float16",
+        "in_fusion_boundary": true
+      },
+      {
+        "name": "output",
+        "op": "output",
+        "target": "output",
+        "input_edges": [
+          "silu"
+        ],
+        "shape": [
+          257,
+          257
+        ],
+        "dtype": "torch.float16",
+        "in_fusion_boundary": false
+      }
+    ],
+    "shape_propagation_error": null,
+    "fusion_boundary": [
+      "add",
+      "layer_norm",
+      "silu"
+    ],
+    "fusion_eligible": true,
+    "eps": 1e-05,
+    "decision": "validated functional add -> layer_norm -> non-inplace silu; eps=1e-05",
+    "rejected_chains": []
+  },
+  "analytical_model": {
+    "flops": 925200.0,
+    "eager_bytes": 794130.0,
+    "fused_bytes": 265738.0,
+    "avoided_bytes": 528392.0,
+    "eager_ai": 1.1650485436893203,
+    "fused_ai": 3.481624758220503,
+    "useful_bytes": 265738.0,
+    "all_quantities_are_estimates": true,
+    "operation_convention": "14*hidden_size+2 ops/row; exp/rsqrt count as one; approximate reductions",
+    "useful_byte_definition": "input + output + one logical copy each of input_bias, gamma, beta",
+    "roofline_ridge_ops_per_byte": null,
+    "roofline_prediction": null,
+    "physical_bottleneck": "unclassified; no profiler-counter evidence"
+  },
+  "candidate_counts": {
+    "generated": 36,
+    "pruned": 36,
+    "shape_valid": 0,
+    "executed": 0,
+    "verified": 0,
+    "correctness_rejected": 0,
+    "runtime_failed": 0,
+    "skipped": 0,
+    "failed": 0,
+    "incorrect": 0,
+    "compilation_failed": 0
+  },
+  "candidate_count_semantics": "executed counts launch attempts; runtime_failed/failed include compilation failures; verified excludes later disqualifications",
+  "candidates": [
+    {
+      "configuration": {
+        "block_size": 256,
+        "num_warps": 8,
+        "num_stages": 4
+      },
+      "launch_attempted": false,
+      "launched": false,
+      "decision": "PRUNED",
+      "reason": "BLOCK_SIZE cannot cover hidden_size",
+      "failure": null,
+      "correctness": null,
+      "initial_sweep": {
+        "trial_medians_ms": [],
+        "rounds": 0,
+        "median_ms": null,
+        "min_ms": null,
+        "max_ms": null
+      },
+      "is_finalist": false,
+      "finalist": {
+        "trial_medians_ms": [],
+        "rounds": 0,
+        "median_ms": null,
+        "min_ms": null,
+        "max_ms": null
+      }
+    },
+    {
+      "configuration": {
+        "block_size": 64,
+        "num_warps": 2,
+        "num_stages": 4
+      },
+      "launch_attempted": false,
+      "launched": false,
+      "decision": "PRUNED",
+      "reason": "BLOCK_SIZE cannot cover hidden_size",
+      "failure": null,
+      "correctness": null,
+      "initial_sweep": {
+        "trial_medians_ms": [],
+        "rounds": 0,
+        "median_ms": null,
+        "min_ms": null,
+        "max_ms": null
+      },
+      "is_finalist": false,
+      "finalist": {
+        "trial_medians_ms": [],
+        "rounds": 0,
+        "median_ms": null,
+        "min_ms": null,
+        "max_ms": null
+      }
+    },
+    {
+      "configuration": {
+        "block_size": 64,
+        "num_warps": 4,
+        "num_stages": 3
+      },
+      "launch_attempted": false,
+      "launched": false,
+      "decision": "PRUNED",
+      "reason": "BLOCK_SIZE cannot cover hidden_size",
+      "failure": null,
+      "correctness": null,
+      "initial_sweep": {
+        "trial_medians_ms": [],
+        "rounds": 0,
+        "median_ms": null,
+        "min_ms": null,
+        "max_ms": null
+      },
+      "is_finalist": false,
+      "finalist": {
+        "trial_medians_ms": [],
+        "rounds": 0,
+        "median_ms": null,
+        "min_ms": null,
+        "max_ms": null
+      }
+    },
+    {
+      "configuration": {
+        "block_size": 32,
+        "num_warps": 2,
+        "num_stages": 2
+      },
+      "launch_attempted": false,
+      "launched": false,
+      "decision": "PRUNED",
+      "reason": "BLOCK_SIZE cannot cover hidden_size",
+      "failure": null,
+      "correctness": null,
+      "initial_sweep": {
+        "trial_medians_ms": [],
+        "rounds": 0,
+        "median_ms": null,
+        "min_ms": null,
+        "max_ms": null
+      },
+      "is_finalist": false,
+      "finalist": {
+        "trial_medians_ms": [],
+        "rounds": 0,
+        "median_ms": null,
+        "min_ms": null,
+        "max_ms": null
+      }
+    },
+    {
+      "configuration": {
+        "block_size": 32,
+        "num_warps": 4,
+        "num_stages": 2
+      },
+      "launch_attempted": false,
+      "launched": false,
+      "decision": "PRUNED",
+      "reason": "BLOCK_SIZE cannot cover hidden_size",
+      "failure": null,
+      "correctness": null,
+      "initial_sweep": {
+        "trial_medians_ms": [],
+        "rounds": 0,
+        "median_ms": null,
+        "min_ms": null,
+        "max_ms": null
+      },
+      "is_finalist": false,
+      "finalist": {
+        "trial_medians_ms": [],
+        "rounds": 0,
+        "median_ms": null,
+        "min_ms": null,
+        "max_ms": null
+      }
+    },
+    {
+      "configuration": {
+        "block_size": 64,
+        "num_warps": 8,
+        "num_stages": 2
+      },
+      "launch_attempted": false,
+      "launched": false,
+      "decision": "PRUNED",
+      "reason": "BLOCK_SIZE cannot cover hidden_size",
+      "failure": null,
+      "correctness": null,
+      "initial_sweep": {
+        "trial_medians_ms": [],
+        "rounds": 0,
+        "median_ms": null,
+        "min_ms": null,
+        "max_ms": null
+      },
+      "is_finalist": false,
+      "finalist": {
+        "trial_medians_ms": [],
+        "rounds": 0,
+        "median_ms": null,
+        "min_ms": null,
+        "max_ms": null
+      }
+    },
+    {
+      "configuration": {
+        "block_size": 32,
+        "num_warps": 2,
+        "num_stages": 3
+      },
+      "launch_attempted": false,
+      "launched": false,
+      "decision": "PRUNED",
+      "reason": "BLOCK_SIZE cannot cover hidden_size",
+      "failure": null,
+      "correctness": null,
+      "initial_sweep": {
+        "trial_medians_ms": [],
+        "rounds": 0,
+        "median_ms": null,
+        "min_ms": null,
+        "max_ms": null
+      },
+      "is_finalist": false,
+      "finalist": {
+        "trial_medians_ms": [],
+        "rounds": 0,
+        "median_ms": null,
+        "min_ms": null,
+        "max_ms": null
+      }
+    },
+    {
+      "configuration": {
+        "block_size": 64,
+        "num_warps": 4,
+        "num_stages": 2
+      },
+      "launch_attempted": false,
+      "launched": false,
+      "decision": "PRUNED",
+      "reason": "BLOCK_SIZE cannot cover hidden_size",
+      "failure": null,
+      "correctness": null,
+      "initial_sweep": {
+        "trial_medians_ms": [],
+        "rounds": 0,
+        "median_ms": null,
+        "min_ms": null,
+        "max_ms": null
+      },
+      "is_finalist": false,
+      "finalist": {
+        "trial_medians_ms": [],
+        "rounds": 0,
+        "median_ms": null,
+        "min_ms": null,
+        "max_ms": null
+      }
+    },
+    {
+      "configuration": {
+        "block_size": 64,
+        "num_warps": 2,
+        "num_stages": 2
+      },
+      "launch_attempted": false,
+      "launched": false,
+      "decision": "PRUNED",
+      "reason": "BLOCK_SIZE cannot cover hidden_size",
+      "failure": null,
+      "correctness": null,
+      "initial_sweep": {
+        "trial_medians_ms": [],
+        "rounds": 0,
+        "median_ms": null,
+        "min_ms": null,
+        "max_ms": null
+      },
+      "is_finalist": false,
+      "finalist": {
+        "trial_medians_ms": [],
+        "rounds": 0,
+        "median_ms": null,
+        "min_ms": null,
+        "max_ms": null
+      }
+    },
+    {
+      "configuration": {
+        "block_size": 128,
+        "num_warps": 8,
+        "num_stages": 3
+      },
+      "launch_attempted": false,
+      "launched": false,
+      "decision": "PRUNED",
+      "reason": "BLOCK_SIZE cannot cover hidden_size",
+      "failure": null,
+      "correctness": null,
+      "initial_sweep": {
+        "trial_medians_ms": [],
+        "rounds": 0,
+        "median_ms": null,
+        "min_ms": null,
+        "max_ms": null
+      },
+      "is_finalist": false,
+      "finalist": {
+        "trial_medians_ms": [],
+        "rounds": 0,
+        "median_ms": null,
+        "min_ms": null,
+        "max_ms": null
+      }
+    },
+    {
+      "configuration": {
+        "block_size": 256,
+        "num_warps": 2,
+        "num_stages": 3
+      },
+      "launch_attempted": false,
+      "launched": false,
+      "decision": "PRUNED",
+      "reason": "BLOCK_SIZE cannot cover hidden_size",
+      "failure": null,
+      "correctness": null,
+      "initial_sweep": {
+        "trial_medians_ms": [],
+        "rounds": 0,
+        "median_ms": null,
+        "min_ms": null,
+        "max_ms": null
+      },
+      "is_finalist": false,
+      "finalist": {
+        "trial_medians_ms": [],
+        "rounds": 0,
+        "median_ms": null,
+        "min_ms": null,
+        "max_ms": null
+      }
+    },
+    {
+      "configuration": {
+        "block_size": 256,
+        "num_warps": 8,
+        "num_stages": 2
+      },
+      "launch_attempted": false,
+      "launched": false,
+      "decision": "PRUNED",
+      "reason": "BLOCK_SIZE cannot cover hidden_size",
+      "failure": null,
+      "correctness": null,
+      "initial_sweep": {
+        "trial_medians_ms": [],
+        "rounds": 0,
+        "median_ms": null,
+        "min_ms": null,
+        "max_ms": null
+      },
+      "is_finalist": false,
+      "finalist": {
+        "trial_medians_ms": [],
+        "rounds": 0,
+        "median_ms": null,
+        "min_ms": null,
+        "max_ms": null
+      }
+    },
+    {
+      "configuration": {
+        "block_size": 32,
+        "num_warps": 8,
+        "num_stages": 4
+      },
+      "launch_attempted": false,
+      "launched": false,
+      "decision": "PRUNED",
+      "reason": "BLOCK_SIZE cannot cover hidden_size",
+      "failure": null,
+      "correctness": null,
+      "initial_sweep": {
+        "trial_medians_ms": [],
+        "rounds": 0,
+        "median_ms": null,
+        "min_ms": null,
+        "max_ms": null
+      },
+      "is_finalist": false,
+      "finalist": {
+        "trial_medians_ms": [],
+        "rounds": 0,
+        "median_ms": null,
+        "min_ms": null,
+        "max_ms": null
+      }
+    },
+    {
+      "configuration": {
+        "block_size": 32,
+        "num_warps": 4,
+        "num_stages": 3
+      },
+      "launch_attempted": false,
+      "launched": false,
+      "decision": "PRUNED",
+      "reason": "BLOCK_SIZE cannot cover hidden_size",
+      "failure": null,
+      "correctness": null,
+      "initial_sweep": {
+        "trial_medians_ms": [],
+        "rounds": 0,
+        "median_ms": null,
+        "min_ms": null,
+        "max_ms": null
+      },
+      "is_finalist": false,
+      "finalist": {
+        "trial_medians_ms": [],
+        "rounds": 0,
+        "median_ms": null,
+        "min_ms": null,
+        "max_ms": null
+      }
+    },
+    {
+      "configuration": {
+        "block_size": 256,
+        "num_warps": 4,
+        "num_stages": 4
+      },
+      "launch_attempted": false,
+      "launched": false,
+      "decision": "PRUNED",
+      "reason": "BLOCK_SIZE cannot cover hidden_size",
+      "failure": null,
+      "correctness": null,
+      "initial_sweep": {
+        "trial_medians_ms": [],
+        "rounds": 0,
+        "median_ms": null,
+        "min_ms": null,
+        "max_ms": null
+      },
+      "is_finalist": false,
+      "finalist": {
+        "trial_medians_ms": [],
+        "rounds": 0,
+        "median_ms": null,
+        "min_ms": null,
+        "max_ms": null
+      }
+    },
+    {
+      "configuration": {
+        "block_size": 32,
+        "num_warps": 4,
+        "num_stages": 4
+      },
+      "launch_attempted": false,
+      "launched": false,
+      "decision": "PRUNED",
+      "reason": "BLOCK_SIZE cannot cover hidden_size",
+      "failure": null,
+      "correctness": null,
+      "initial_sweep": {
+        "trial_medians_ms": [],
+        "rounds": 0,
+        "median_ms": null,
+        "min_ms": null,
+        "max_ms": null
+      },
+      "is_finalist": false,
+      "finalist": {
+        "trial_medians_ms": [],
+        "rounds": 0,
+        "median_ms": null,
+        "min_ms": null,
+        "max_ms": null
+      }
+    },
+    {
+      "configuration": {
+        "block_size": 256,
+        "num_warps": 4,
+        "num_stages": 3
+      },
+      "launch_attempted": false,
+      "launched": false,
+      "decision": "PRUNED",
+      "reason": "BLOCK_SIZE cannot cover hidden_size",
+      "failure": null,
+      "correctness": null,
+      "initial_sweep": {
+        "trial_medians_ms": [],
+        "rounds": 0,
+        "median_ms": null,
+        "min_ms": null,
+        "max_ms": null
+      },
+      "is_finalist": false,
+      "finalist": {
+        "trial_medians_ms": [],
+        "rounds": 0,
+        "median_ms": null,
+        "min_ms": null,
+        "max_ms": null
+      }
+    },
+    {
+      "configuration": {
+        "block_size": 256,
+        "num_warps": 2,
+        "num_stages": 4
+      },
+      "launch_attempted": false,
+      "launched": false,
+      "decision": "PRUNED",
+      "reason": "BLOCK_SIZE cannot cover hidden_size",
+      "failure": null,
+      "correctness": null,
+      "initial_sweep": {
+        "trial_medians_ms": [],
+        "rounds": 0,
+        "median_ms": null,
+        "min_ms": null,
+        "max_ms": null
+      },
+      "is_finalist": false,
+      "finalist": {
+        "trial_medians_ms": [],
+        "rounds": 0,
+        "median_ms": null,
+        "min_ms": null,
+        "max_ms": null
+      }
+    },
+    {
+      "configuration": {
+        "block_size": 128,
+        "num_warps": 2,
+        "num_stages": 4
+      },
+      "launch_attempted": false,
+      "launched": false,
+      "decision": "PRUNED",
+      "reason": "BLOCK_SIZE cannot cover hidden_size",
+      "failure": null,
+      "correctness": null,
+      "initial_sweep": {
+        "trial_medians_ms": [],
+        "rounds": 0,
+        "median_ms": null,
+        "min_ms": null,
+        "max_ms": null
+      },
+      "is_finalist": false,
+      "finalist": {
+        "trial_medians_ms": [],
+        "rounds": 0,
+        "median_ms": null,
+        "min_ms": null,
+        "max_ms": null
+      }
+    },
+    {
+      "configuration": {
+        "block_size": 128,
+        "num_warps": 4,
+        "num_stages": 3
+      },
+      "launch_attempted": false,
+      "launched": false,
+      "decision": "PRUNED",
+      "reason": "BLOCK_SIZE cannot cover hidden_size",
+      "failure": null,
+      "correctness": null,
+      "initial_sweep": {
+        "trial_medians_ms": [],
+        "rounds": 0,
+        "median_ms": null,
+        "min_ms": null,
+        "max_ms": null
+      },
+      "is_finalist": false,
+      "finalist": {
+        "trial_medians_ms": [],
+        "rounds": 0,
+        "median_ms": null,
+        "min_ms": null,
+        "max_ms": null
+      }
+    },
+    {
+      "configuration": {
+        "block_size": 64,
+        "num_warps": 8,
+        "num_stages": 4
+      },
+      "launch_attempted": false,
+      "launched": false,
+      "decision": "PRUNED",
+      "reason": "BLOCK_SIZE cannot cover hidden_size",
+      "failure": null,
+      "correctness": null,
+      "initial_sweep": {
+        "trial_medians_ms": [],
+        "rounds": 0,
+        "median_ms": null,
+        "min_ms": null,
+        "max_ms": null
+      },
+      "is_finalist": false,
+      "finalist": {
+        "trial_medians_ms": [],
+        "rounds": 0,
+        "median_ms": null,
+        "min_ms": null,
+        "max_ms": null
+      }
+    },
+    {
+      "configuration": {
+        "block_size": 256,
+        "num_warps": 4,
+        "num_stages": 2
+      },
+      "launch_attempted": false,
+      "launched": false,
+      "decision": "PRUNED",
+      "reason": "BLOCK_SIZE cannot cover hidden_size",
+      "failure": null,
+      "correctness": null,
+      "initial_sweep": {
+        "trial_medians_ms": [],
+        "rounds": 0,
+        "median_ms": null,
+        "min_ms": null,
+        "max_ms": null
+      },
+      "is_finalist": false,
+      "finalist": {
+        "trial_medians_ms": [],
+        "rounds": 0,
+        "median_ms": null,
+        "min_ms": null,
+        "max_ms": null
+      }
+    },
+    {
+      "configuration": {
+        "block_size": 128,
+        "num_warps": 2,
+        "num_stages": 3
+      },
+      "launch_attempted": false,
+      "launched": false,
+      "decision": "PRUNED",
+      "reason": "BLOCK_SIZE cannot cover hidden_size",
+      "failure": null,
+      "correctness": null,
+      "initial_sweep": {
+        "trial_medians_ms": [],
+        "rounds": 0,
+        "median_ms": null,
+        "min_ms": null,
+        "max_ms": null
+      },
+      "is_finalist": false,
+      "finalist": {
+        "trial_medians_ms": [],
+        "rounds": 0,
+        "median_ms": null,
+        "min_ms": null,
+        "max_ms": null
+      }
+    },
+    {
+      "configuration": {
+        "block_size": 128,
+        "num_warps": 8,
+        "num_stages": 4
+      },
+      "launch_attempted": false,
+      "launched": false,
+      "decision": "PRUNED",
+      "reason": "BLOCK_SIZE cannot cover hidden_size",
+      "failure": null,
+      "correctness": null,
+      "initial_sweep": {
+        "trial_medians_ms": [],
+        "rounds": 0,
+        "median_ms": null,
+        "min_ms": null,
+        "max_ms": null
+      },
+      "is_finalist": false,
+      "finalist": {
+        "trial_medians_ms": [],
+        "rounds": 0,
+        "median_ms": null,
+        "min_ms": null,
+        "max_ms": null
+      }
+    },
+    {
+      "configuration": {
+        "block_size": 128,
+        "num_warps": 4,
+        "num_stages": 2
+      },
+      "launch_attempted": false,
+      "launched": false,
+      "decision": "PRUNED",
+      "reason": "BLOCK_SIZE cannot cover hidden_size",
+      "failure": null,
+      "correctness": null,
+      "initial_sweep": {
+        "trial_medians_ms": [],
+        "rounds": 0,
+        "median_ms": null,
+        "min_ms": null,
+        "max_ms": null
+      },
+      "is_finalist": false,
+      "finalist": {
+        "trial_medians_ms": [],
+        "rounds": 0,
+        "median_ms": null,
+        "min_ms": null,
+        "max_ms": null
+      }
+    },
+    {
+      "configuration": {
+        "block_size": 64,
+        "num_warps": 4,
+        "num_stages": 4
+      },
+      "launch_attempted": false,
+      "launched": false,
+      "decision": "PRUNED",
+      "reason": "BLOCK_SIZE cannot cover hidden_size",
+      "failure": null,
+      "correctness": null,
+      "initial_sweep": {
+        "trial_medians_ms": [],
+        "rounds": 0,
+        "median_ms": null,
+        "min_ms": null,
+        "max_ms": null
+      },
+      "is_finalist": false,
+      "finalist": {
+        "trial_medians_ms": [],
+        "rounds": 0,
+        "median_ms": null,
+        "min_ms": null,
+        "max_ms": null
+      }
+    },
+    {
+      "configuration": {
+        "block_size": 128,
+        "num_warps": 2,
+        "num_stages": 2
+      },
+      "launch_attempted": false,
+      "launched": false,
+      "decision": "PRUNED",
+      "reason": "BLOCK_SIZE cannot cover hidden_size",
+      "failure": null,
+      "correctness": null,
+      "initial_sweep": {
+        "trial_medians_ms": [],
+        "rounds": 0,
+        "median_ms": null,
+        "min_ms": null,
+        "max_ms": null
+      },
+      "is_finalist": false,
+      "finalist": {
+        "trial_medians_ms": [],
+        "rounds": 0,
+        "median_ms": null,
+        "min_ms": null,
+        "max_ms": null
+      }
+    },
+    {
+      "configuration": {
+        "block_size": 256,
+        "num_warps": 8,
+        "num_stages": 3
+      },
+      "launch_attempted": false,
+      "launched": false,
+      "decision": "PRUNED",
+      "reason": "BLOCK_SIZE cannot cover hidden_size",
+      "failure": null,
+      "correctness": null,
+      "initial_sweep": {
+        "trial_medians_ms": [],
+        "rounds": 0,
+        "median_ms": null,
+        "min_ms": null,
+        "max_ms": null
+      },
+      "is_finalist": false,
+      "finalist": {
+        "trial_medians_ms": [],
+        "rounds": 0,
+        "median_ms": null,
+        "min_ms": null,
+        "max_ms": null
+      }
+    },
+    {
+      "configuration": {
+        "block_size": 256,
+        "num_warps": 2,
+        "num_stages": 2
+      },
+      "launch_attempted": false,
+      "launched": false,
+      "decision": "PRUNED",
+      "reason": "BLOCK_SIZE cannot cover hidden_size",
+      "failure": null,
+      "correctness": null,
+      "initial_sweep": {
+        "trial_medians_ms": [],
+        "rounds": 0,
+        "median_ms": null,
+        "min_ms": null,
+        "max_ms": null
+      },
+      "is_finalist": false,
+      "finalist": {
+        "trial_medians_ms": [],
+        "rounds": 0,
+        "median_ms": null,
+        "min_ms": null,
+        "max_ms": null
+      }
+    },
+    {
+      "configuration": {
+        "block_size": 32,
+        "num_warps": 8,
+        "num_stages": 3
+      },
+      "launch_attempted": false,
+      "launched": false,
+      "decision": "PRUNED",
+      "reason": "BLOCK_SIZE cannot cover hidden_size",
+      "failure": null,
+      "correctness": null,
+      "initial_sweep": {
+        "trial_medians_ms": [],
+        "rounds": 0,
+        "median_ms": null,
+        "min_ms": null,
+        "max_ms": null
+      },
+      "is_finalist": false,
+      "finalist": {
+        "trial_medians_ms": [],
+        "rounds": 0,
+        "median_ms": null,
+        "min_ms": null,
+        "max_ms": null
+      }
+    },
+    {
+      "configuration": {
+        "block_size": 64,
+        "num_warps": 8,
+        "num_stages": 3
+      },
+      "launch_attempted": false,
+      "launched": false,
+      "decision": "PRUNED",
+      "reason": "BLOCK_SIZE cannot cover hidden_size",
+      "failure": null,
+      "correctness": null,
+      "initial_sweep": {
+        "trial_medians_ms": [],
+        "rounds": 0,
+        "median_ms": null,
+        "min_ms": null,
+        "max_ms": null
+      },
+      "is_finalist": false,
+      "finalist": {
+        "trial_medians_ms": [],
+        "rounds": 0,
+        "median_ms": null,
+        "min_ms": null,
+        "max_ms": null
+      }
+    },
+    {
+      "configuration": {
+        "block_size": 128,
+        "num_warps": 4,
+        "num_stages": 4
+      },
+      "launch_attempted": false,
+      "launched": false,
+      "decision": "PRUNED",
+      "reason": "BLOCK_SIZE cannot cover hidden_size",
+      "failure": null,
+      "correctness": null,
+      "initial_sweep": {
+        "trial_medians_ms": [],
+        "rounds": 0,
+        "median_ms": null,
+        "min_ms": null,
+        "max_ms": null
+      },
+      "is_finalist": false,
+      "finalist": {
+        "trial_medians_ms": [],
+        "rounds": 0,
+        "median_ms": null,
+        "min_ms": null,
+        "max_ms": null
+      }
+    },
+    {
+      "configuration": {
+        "block_size": 32,
+        "num_warps": 8,
+        "num_stages": 2
+      },
+      "launch_attempted": false,
+      "launched": false,
+      "decision": "PRUNED",
+      "reason": "BLOCK_SIZE cannot cover hidden_size",
+      "failure": null,
+      "correctness": null,
+      "initial_sweep": {
+        "trial_medians_ms": [],
+        "rounds": 0,
+        "median_ms": null,
+        "min_ms": null,
+        "max_ms": null
+      },
+      "is_finalist": false,
+      "finalist": {
+        "trial_medians_ms": [],
+        "rounds": 0,
+        "median_ms": null,
+        "min_ms": null,
+        "max_ms": null
+      }
+    },
+    {
+      "configuration": {
+        "block_size": 64,
+        "num_warps": 2,
+        "num_stages": 3
+      },
+      "launch_attempted": false,
+      "launched": false,
+      "decision": "PRUNED",
+      "reason": "BLOCK_SIZE cannot cover hidden_size",
+      "failure": null,
+      "correctness": null,
+      "initial_sweep": {
+        "trial_medians_ms": [],
+        "rounds": 0,
+        "median_ms": null,
+        "min_ms": null,
+        "max_ms": null
+      },
+      "is_finalist": false,
+      "finalist": {
+        "trial_medians_ms": [],
+        "rounds": 0,
+        "median_ms": null,
+        "min_ms": null,
+        "max_ms": null
+      }
+    },
+    {
+      "configuration": {
+        "block_size": 128,
+        "num_warps": 8,
+        "num_stages": 2
+      },
+      "launch_attempted": false,
+      "launched": false,
+      "decision": "PRUNED",
+      "reason": "BLOCK_SIZE cannot cover hidden_size",
+      "failure": null,
+      "correctness": null,
+      "initial_sweep": {
+        "trial_medians_ms": [],
+        "rounds": 0,
+        "median_ms": null,
+        "min_ms": null,
+        "max_ms": null
+      },
+      "is_finalist": false,
+      "finalist": {
+        "trial_medians_ms": [],
+        "rounds": 0,
+        "median_ms": null,
+        "min_ms": null,
+        "max_ms": null
+      }
+    },
+    {
+      "configuration": {
+        "block_size": 32,
+        "num_warps": 2,
+        "num_stages": 4
+      },
+      "launch_attempted": false,
+      "launched": false,
+      "decision": "PRUNED",
+      "reason": "BLOCK_SIZE cannot cover hidden_size",
+      "failure": null,
+      "correctness": null,
+      "initial_sweep": {
+        "trial_medians_ms": [],
+        "rounds": 0,
+        "median_ms": null,
+        "min_ms": null,
+        "max_ms": null
+      },
+      "is_finalist": false,
+      "finalist": {
+        "trial_medians_ms": [],
+        "rounds": 0,
+        "median_ms": null,
+        "min_ms": null,
+        "max_ms": null
+      }
+    }
+  ],
+  "timing_protocol": {
+    "statistic": "median of trial medians",
+    "tuning_warmup": 3,
+    "tuning_iterations": 10,
+    "finalist_rounds": 2,
+    "finalist_count_limit": 3,
+    "deployment_rounds": 2,
+    "deployment_warmup": 3,
+    "deployment_iterations": 10,
+    "clock": "CUDA events with synchronization",
+    "compilation_validation_autotuning_excluded": true
+  },
+  "paths": {
+    "eager": {
+      "implementation": "Eager PyTorch",
+      "available_and_verified": true,
+      "latency_ms": 0.1430319994688034,
+      "timing": {
+        "trial_medians_ms": [
+          0.1414880007505417,
+          0.14457599818706512
+        ],
+        "rounds": 2,
+        "median_ms": 0.1430319994688034,
+        "min_ms": 0.1414880007505417,
+        "max_ms": 0.14457599818706512
+      },
+      "correctness": {
+        "passed": true,
+        "max_abs": 0.0,
+        "max_rel": 0.0,
+        "max_normalized_error": 0.0,
+        "mismatch_count": 0,
+        "mismatch_percentage": 0.0,
+        "elements_checked": 528392,
+        "atol": 0.005,
+        "rtol": 0.005,
+        "reason": "all 8 validation cases passed"
+      },
+      "estimated_effective_bandwidth_gbps": 1.8578919471650113,
+      "speedup_over_eager": 1.0,
+      "failure": null,
+      "fallback_path": null,
+      "fallback_reason": null
+    },
+    "torch_compile": {
+      "implementation": "torch.compile / Inductor",
+      "available_and_verified": true,
+      "latency_ms": 0.26760800182819366,
+      "timing": {
+        "trial_medians_ms": [
+          0.2672159969806671,
+          0.2680000066757202
+        ],
+        "rounds": 2,
+        "median_ms": 0.26760800182819366,
+        "min_ms": 0.2672159969806671,
+        "max_ms": 0.2680000066757202
+      },
+      "correctness": {
+        "passed": true,
+        "max_abs": 0.00390625,
+        "max_rel": 15.505882352941176,
+        "max_normalized_error": 0.23837902264600713,
+        "mismatch_count": 0,
+        "mismatch_percentage": 0.0,
+        "elements_checked": 528392,
+        "atol": 0.005,
+        "rtol": 0.005,
+        "reason": "all 8 validation cases passed"
+      },
+      "estimated_effective_bandwidth_gbps": 0.99301216026644,
+      "speedup_over_eager": 0.5344832684062677,
+      "failure": null,
+      "fallback_path": null,
+      "fallback_reason": null
+    },
+    "triton": {
+      "implementation": "fused Triton",
+      "available_and_verified": false,
+      "latency_ms": null,
+      "timing": {
+        "trial_medians_ms": [],
+        "rounds": 0,
+        "median_ms": null,
+        "min_ms": null,
+        "max_ms": null
+      },
+      "correctness": null,
+      "estimated_effective_bandwidth_gbps": null,
+      "speedup_over_eager": null,
+      "failure": null,
+      "fallback_path": null,
+      "fallback_reason": null
+    }
+  },
+  "selection": {
+    "implementation": "Eager PyTorch",
+    "configuration": null,
+    "best_observed_tuning_configuration": null,
+    "tuning_rule": "shuffled initial sweep; top three verified; median of interleaved finalist trial medians",
+    "deployment_margin": 0.02,
+    "rationale": "Retain Eager PyTorch: hidden size 257 exceeds bounded kernel limit 256",
+    "fallback_path": "Eager PyTorch",
+    "fallback_reason": "hidden size 257 exceeds bounded kernel limit 256"
+  },
+  "nonfinite_encoding": "non-finite diagnostics are null, never NaN or Infinity",
+  "failure_classification": "known compiler exception chains => compilation; other execution exceptions => runtime"
+}

@@ -1,0 +1,33 @@
+{
+  "schema_version": "2.0",
+  "task_id": "bias_layernorm_silu",
+  "proposals": [
+    {
+      "candidate_id": "syntax-error-example",
+      "candidate_type": "pytorch_source",
+      "strategy": "Deliberate invalid syntax to exercise evaluator feedback",
+      "source": "def run(:",
+      "launch_parameters": {},
+      "expected_optimization": "None; negative test",
+      "schema_version": "2.0"
+    },
+    {
+      "candidate_id": "trusted-reference",
+      "candidate_type": "eager",
+      "strategy": "Recover with the trusted eager reference",
+      "source": null,
+      "launch_parameters": {},
+      "expected_optimization": "None; safe fallback",
+      "schema_version": "2.0"
+    },
+    {
+      "candidate_id": "cpu-source-reference",
+      "candidate_type": "pytorch_source",
+      "strategy": "Exercise source execution on CPU or CUDA without claiming an improvement",
+      "source": "import torch.nn.functional as functional\n\ndef run(x, input_bias, gamma, beta, *, eps, launch_parameters):\n    return functional.silu(functional.layer_norm(x + input_bias, (x.shape[-1],), gamma, beta, eps))\n",
+      "launch_parameters": {},
+      "expected_optimization": "None; functional reference implementation",
+      "schema_version": "2.0"
+    }
+  ]
+}
