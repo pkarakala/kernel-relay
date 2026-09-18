@@ -2,34 +2,42 @@
 
 [![CPU checks](https://github.com/pkarakala/kernel-relay/actions/workflows/ci.yml/badge.svg)](https://github.com/pkarakala/kernel-relay/actions/workflows/ci.yml)
 
-KernelRelay is a small, reproducible PyTorch-to-Triton compiler experiment. It finds one fusion opportunity in a PyTorch FX graph, tests kernel proposals against eager PyTorch, measures the correct implementations on a GPU, and keeps the fastest verified path—or falls back safely.
+I built KernelRelay to answer a narrow question: can a compiler loop find a useful fusion in a PyTorch graph, reject wrong kernels, and demonstrate a real GPU win against verified framework paths? The test case is `SiLU(LayerNorm(x + input_bias, weight=gamma, bias=beta))`.
 
-The workload is `SiLU(LayerNorm(x + input_bias, weight=gamma, bias=beta))`. This is an **independent research prototype for one operator cluster**, not a general-purpose compiler or a production sandbox.
+On one Colab Tesla T4, the fastest verified fused finalist took **0.053 ms versus 0.120 ms for the best framework path (2.26×)** in a same-process confirmation. The proposal backend in this experiment is a **fixed mock sequence**, not an LLM. [The full measurements and timing drift are published](results/agent-eval/README.md).
 
-## How it works
+The interesting work was in the evaluation harness: an invalid proposal had to fail visibly, Colab returned `ENOSYS` for Landlock, a sanitized worker initially lost access to the NVIDIA driver library, and separate-process timings drifted enough to warrant an interleaved finalist check. Those failures shaped the correctness gates, explicit trust mode, and benchmark protocol.
+
+## The fusion target
 
 ```mermaid
 flowchart LR
-    A[PyTorch layer] --> B[FX trace and shape analysis]
-    B --> C[Match add → LayerNorm → SiLU]
-    C --> D[Propose fused Triton candidate]
-    D --> E{Matches eager reference?}
-    E -- No --> F[Reject and record feedback]
-    E -- Yes --> G[Measure steady-state latency]
-    G --> H{Faster than verified framework path?}
-    H -- Yes --> I[Select fused kernel]
-    H -- No --> J[Use framework fallback]
-    F --> D
+    X["x"] --> A["add"]
+    IB["input_bias"] --> A
+    A --> N["LayerNorm"]
+    G["gamma"] --> N
+    BT["beta"] --> N
+    N --> S["SiLU"]
+    S --> Y["output y"]
 ```
+
+The FX matcher checks the actual graph edges, tensor roles, shapes, and epsilon before treating this chain as fusible. Eager PyTorch can materialize the add and LayerNorm intermediates; the supported Triton path uses one program per row, accumulates the normalization statistics in FP32, and writes only the final output to global memory.
 
 There are two related entry points:
 
 | Entry point | What it demonstrates |
 | --- | --- |
 | [`agentic_kernel_compiler.py`](agentic_kernel_compiler.py) | A self-contained compiler loop that searches 36 launch configurations for one fused kernel body. |
-| [`agent_eval.py`](agent_eval.py) | A bounded proposal/evaluation loop with compile errors, correctness checks, timing, feedback, rewards, and a JSON trajectory. Its built-in agent is **deterministic mock code**, not a language model. |
+| [`agent_eval.py`](agent_eval.py) | A bounded source-proposal evaluation loop with compile errors, correctness checks, timing, rewards, and a JSON trajectory. The supplied mock agent emits predefined candidates. |
 
-The proposal evaluator normally requires OS filesystem confinement. The Colab T4 used for the published V2 measurements did not expose Landlock, so those runs used an explicit **exact-fixture-only mode with no OS sandbox**. Arbitrary or replayed source is not accepted in that mode. See [architecture and security limits](docs/AGENT_EVALUATION.md).
+One recorded full T4 run shows the deliberately malformed first fixture being rejected and a later candidate being measured (condensed from the [terminal log](results/agent-eval/v2-full-t4-fp16.log) and [verification trace](results/agent-eval/v2-full-t4-fp16.json); latency rounded here):
+
+```text
+round 0  compile_error  SyntaxError: invalid syntax
+round 2  measured       0.057248 ms, passed eight correctness cases
+```
+
+The mock sequence is fixed; it does **not** choose its next proposal by reasoning over the error. The controller still records that error and supplies history to the proposal interface, so a future adaptive backend could use it. The Colab run used an explicit exact-fixture-only mode because Landlock was unavailable; that mode has **no OS sandbox** and rejects replay or arbitrary source. [Architecture and security details](docs/AGENT_EVALUATION.md).
 
 ## Try it locally
 
@@ -52,36 +60,35 @@ On one Google Colab Tesla T4, an 8192 × 128 FP16 task passed eight correctness 
 
 | Path | Median of round medians |
 | --- | ---: |
-| Eager PyTorch | 0.119824 ms |
-| `torch.compile` / Inductor default | 0.140480 ms |
-| Fused candidate 2 | 0.055312 ms |
-| Fused candidate 3 | **0.053088 ms** |
+| Eager PyTorch | 0.120 ms |
+| `torch.compile` / Inductor default | 0.140 ms |
+| Fused candidate 2 | 0.055 ms |
+| Fused candidate 3 | **0.053 ms** |
 
-The best fused median was **2.257×** faster than the best framework median in that confirmation. Three separate full evaluations also selected a verified fused candidate, but framework baseline timing drifted appreciably; this is a *recorded T4 result*, not a universal speedup or a statistical confidence interval. The experiment did not measure physical HBM bandwidth. [Read the methodology, limitations, and path-normalized public records](results/agent-eval/README.md). The earlier [configuration-search T4 records](results/t4/README.md) are a separate experiment and must not be conflated with the proposal loop.
+The best fused median was **2.26×** faster than the best framework median in that confirmation. Three separate full evaluations also selected a verified fused candidate, but framework baseline timing drifted appreciably. This is a measured result on one T4, not a universal speedup or a confidence interval; no physical HBM bandwidth counters were collected. [Exact timings, protocol, and path-normalized public records](results/agent-eval/README.md). The earlier [configuration-search T4 records](results/t4/README.md) are a separate experiment.
 
 ## Evaluation boundary
 
 ```mermaid
 flowchart TB
-    A[Mock or replay proposal backend] --> B[Controller: budget and feedback]
-    B --> C[Candidate evaluator]
-    C --> D[Worker subprocess]
-    D --> E[Compile and run]
-    E --> F[Shape, dtype, finite and tolerance checks]
-    F -->|Pass only| G[Synchronized latency trials]
-    F -->|Fail| H[Rejected candidate + diagnostic]
-    G --> B
-    H --> B
-    I[Strict mode: OS confinement required] -.-> D
-    J[Colab exception: exact built-in fixtures, no OS sandbox] -.-> D
+    P["Proposal backend<br/>built-in mock is a fixed sequence"] --> C["Controller<br/>budget + recorded history"]
+    C --> W["Worker subprocess<br/>compile and execute"]
+    W --> V{"Eager-reference checks<br/>shape, dtype, finite, tolerance"}
+    V -- Fail --> R["Reject + diagnostic"]
+    V -- Pass --> B["Synchronized CUDA timing"]
+    R --> T["Trace + reward"]
+    B --> T
+    T --> C
+    S["Strict mode: OS confinement"] -.-> W
+    F["Colab: exact fixtures only<br/>NO OS sandbox"] -.-> W
 ```
 
-This separation matters: eager PyTorch is the numerical oracle, invalid candidates never receive a positive speedup, compilation is excluded from steady-state timing, and a verified framework implementation remains the fallback.
+The arrow back to the controller represents recorded feedback and another bounded round—not learning by the supplied mock. A candidate is timed only after passing eager-reference checks; compilation stays outside steady-state timing, and a verified framework path remains the fallback.
 
 ## Scope and limitations
 
 - One inference workload; no backward kernel, dynamic-shape generality, multi-vendor backend, or production deployment claim.
-- The V1 path tunes a handwritten kernel. The V2 mock backend supplies predefined source proposals; it does **not** demonstrate a frontier model learning to write kernels.
+- The V1 path tunes a handwritten kernel. The V2 mock backend supplies predefined source proposals; no frontier-model optimization or training is demonstrated.
 - Analytical FLOP and byte estimates are models, not hardware-counter readings. GPU timings depend on device, software versions, clock state, and measurement protocol.
 - Strict isolation is not a complete hostile-code sandbox. The Colab trusted-fixture exception has **no OS sandbox** and must not be used for arbitrary source.
 
